@@ -9,7 +9,7 @@
 <template>
     <footer class="footer">
         <div class="container">
-            Copyright &copy; <router-link :to="( base_path )">{{ site_name }}</router-link>
+            Copyright &copy; <router-link to="( base_path )">{{ site_name }}</router-link>
         </div>
     </footer>
 </template>

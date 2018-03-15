@@ -30,8 +30,11 @@ To build the `dist/build.js` script before deploying run:
 npm run build
 ```
 
+### Testing
+[List of supported URIs](docs/TESTING.md)
 
 ### History
+* 2018-03: WordpressRoute Builder added
 * 2018-03: Vue 2.0 Compatible (@MW)
 * 2016-02: Vue 1.0 Based (@GP)
 

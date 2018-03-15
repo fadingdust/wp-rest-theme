@@ -27,7 +27,7 @@
             </div>
             <ul class="nav">
                 <li v-for="page in pages">
-                    <router-link :to="( base_path + page.slug )">{{ page.title.rendered }}</router-link>
+                    <router-link :to="( page.permalink_path )">{{ page.title.rendered }}</router-link>
                 </li>
             </ul>
         </div>
@@ -50,7 +50,7 @@
 
         methods: {
             getPages() {
-                this.$http.get(wp.root + 'wp/v2/pages').then(function(response) {
+                this.$http.get(wp.root + 'wp/v2/page').then(function(response) {
                     this.pages = response.data;
                 }, function(response) {
                     console.log(response);

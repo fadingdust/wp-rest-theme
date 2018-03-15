@@ -13,10 +13,7 @@
 
 <script>
     export default {
-        props: ['postId'],
-        mounted() {
-            this.getPage();
-        },
+        props: ['post_slug'],
 
         data() {
             return {
@@ -29,11 +26,23 @@
             }
         },
 
+        mounted() {
+            this.getPage();
+        },
+
         methods: {
             getPage() {
-                this.$http.get(wp.root + 'wp/v2/pages/' + this.postId).then(function(response) {
-                    this.page = response.data;
-                    this.$emit('page-title', this.page.title.rendered);
+                this.$http.get(wp.root + 'wp/v2/page/?slug=' + this.post_slug).then(function(response) {
+
+                    if( response.data.length == 0 ){
+                      this.page.title.rendered = "Not Found";
+                      this.page.content.rendered = "We could not find anything that matched this request.";
+
+                    } else {
+                      this.page = response.data[0];
+                      this.$emit('page-title', this.page.title.rendered);
+                    }
+
                 }, function(response) {
                     console.log(response);
                 });
