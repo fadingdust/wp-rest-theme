@@ -1,6 +1,6 @@
 # WP REST Theme
 
-This is a simple skeleton theme powered by the WordPress REST API and Vue.js. The aim is to 
+This is a simple skeleton theme powered by the WordPress REST API and Vue.js. The aim is to
 demonstrate how to create a [single page application](https://en.wikipedia.org/wiki/Single-page_application) using
 [Vue.js](http://vuejs.org) to power the front end site while fetching data from the backend via the
 [WordPress REST API](http://v2.wp-api.org), all without sacrificing SEO.
@@ -29,6 +29,11 @@ To build the `dist/build.js` script before deploying run:
 ```
 npm run build
 ```
+
+
+### History
+* 2018-03: Vue 2.0 Compatible (@MW)
+* 2016-02: Vue 1.0 Based (@GP)
 
 ### Credits
 

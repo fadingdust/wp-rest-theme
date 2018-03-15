@@ -1,4 +1,4 @@
-import Vue from 'vue'
+import Vue from 'vue/dist/vue.js'
 import VueRouter from 'vue-router'
 
 Vue.use(require('vue-resource'));
@@ -16,12 +16,32 @@ Vue.component('theme-header', Header)
 import Footer from './theme-footer.vue'
 Vue.component('theme-footer', Footer)
 
-var App = Vue.extend({
-    template: '<theme-header></theme-header>' +
-              '<div class="container"><router-view></router-view></div>' +
-              '<theme-footer></theme-footer>',
+var router = new VueRouter({
+  mode: 'history'
+});
 
-    ready() {
+router.addRoutes([ {
+    path: wp.base_path,
+    component: Posts
+}]);
+
+for (var key in wp.routes) {
+    var route = wp.routes[key];
+    router.addRoutes([ {
+        path: wp.base_path + route.slug,
+        component: Vue.component(capitalize(route.type)),
+        props: {default: true, postId: route.id}
+    }]);
+}
+
+var App = new Vue({
+    el: '#app',
+    router: router,
+    template: '<div id="app-root"><theme-header></theme-header>' +
+              '<div class="container"><router-view :key="this.$route.fullPath"></router-view></div>' +
+              '<theme-footer></theme-footer></div>',
+
+    mounted() {
         this.updateTitle('');
     },
 
@@ -37,24 +57,6 @@ var App = Vue.extend({
         }
     }
 });
-var router = new VueRouter({
-    hashbang: false,
-    history: true
-});
-
-router.on(wp.base_path, {
-    component: Posts
-});
-
-for (var key in wp.routes) {
-    var route = wp.routes[key];
-    router.on(wp.base_path + route.slug, {
-        component: Vue.component(capitalize(route.type)),
-        postId: route.id
-    });
-}
-
-router.start(App, '#app');
 
 function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);

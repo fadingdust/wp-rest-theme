@@ -3,12 +3,11 @@
 </style>
 
 <template>
-    <div class="post">
-        <h1 class="entry-title" v-if="isSingle">{{ post.title.rendered }}</h1>
-        <h2 class="entry-title" v-else><a v-link="{ path: base_path + post.slug }">{{ post.title.rendered }}</a></h2>
+    <div class="post" v:if="singlePost.title">
+        <h1 class="entry-title" v-if="isSingle">{{ singlePost.title.rendered }}</h1>
+        <h2 class="entry-title" v-else><router-link :to="( base_path + singlePost.slug )">{{ singlePost.title.rendered }}</a></h2>
 
-        <div class="entry-content">
-            {{{ post.content.rendered }}}
+        <div class="entry-content" v-html="singlePost.content.rendered">
         </div>
     </div>
 </template>
@@ -16,39 +15,46 @@
 <script>
     export default {
         props: {
+            postId: {
+              default(){ return 0; }
+            },
             post: {
-                type: Object,
-                default() {
-                    return {
-                        id: 0,
-                        slug: '',
-                        title: { rendered: '' },
-                        content: { rendered: '' }
-                    }
-                }
-            }
-        },
-
-        ready() {
-            // If post hasn't been passed by prop
-            if (!this.post.id) {
-                this.getPost();
-                this.isSingle = true;
+                type: Object
             }
         },
 
         data() {
             return {
                 base_path: wp.base_path,
-                isSingle: false
+                isSingle: false,
+                singlePost: {
+                        id: 0,
+                        slug: '',
+                        title: { rendered: '' },
+                        content: { rendered: '' }
+                    }
             }
         },
 
+        created() {
+            if (this.postId > 0) {
+                this.getPost(this.postId);
+                this.isSingle = true;
+            }else{  // Likely an Excerpt in an Archive
+                this.singlePost = this.post;
+            }
+
+        },
+
+        mounted() {
+        },
+
+
         methods: {
-            getPost() {
-                this.$http.get(wp.root + 'wp/v2/posts/' + this.$route.postId).then(function(response) {
-                    this.post = response.data;
-                    this.$dispatch('page-title', this.post.title.rendered);
+            getPost(postId) {
+                this.$http.get(wp.root + 'wp/v2/posts/' + postId).then(function(response) {
+                    this.singlePost = response.data;
+                    this.$emit('page-title', response.data.title.rendered);
                 }, function(response) {
                     console.log(response);
                 });

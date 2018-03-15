@@ -23,11 +23,11 @@
     <header class="header">
         <div class="container">
             <div class="site-title">
-                <a v-link="{ path: base_path }">{{ site_name }}</a>
+                <router-link :to="( base_path )">{{ site_name }}</router-link>
             </div>
             <ul class="nav">
                 <li v-for="page in pages">
-                    <a v-link="{ path: base_path + page.slug }">{{ page.title.rendered }}</a>
+                    <router-link :to="( base_path + page.slug )">{{ page.title.rendered }}</router-link>
                 </li>
             </ul>
         </div>
@@ -36,7 +36,7 @@
 
 <script>
     export default {
-        ready() {
+        mounted() {
             this.getPages();
         },
 

@@ -4,13 +4,13 @@
 
 <template>
     <div class="posts">
-        <Post v-for="post in posts" :post="post"></Post>
+        <Post v-for="post in posts" :post="post" :key="post.id"></Post>
     </div>
 </template>
 
 <script>
     export default {
-        ready() {
+        mounted() {
             this.getPosts();
         },
 
@@ -24,7 +24,7 @@
             getPosts() {
                 this.$http.get(wp.root + 'wp/v2/posts').then(function(response) {
                     this.posts = response.data;
-                    this.$dispatch('page-title', '');
+                    this.$emit('page-title', '');
                 }, function(response) {
                     console.log(response);
                 });
