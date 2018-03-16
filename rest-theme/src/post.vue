@@ -17,6 +17,7 @@
     export default {
         props: {
             post_slug: { type: String },
+            post_type: { type: String },
             post: {
                 type: Object,
                 default() {
@@ -44,12 +45,14 @@
         },
 
         created: function() {
-
             if (!this.post.id) {
-                var post_slug = this.post_slug;
+                let post_type = this.post_type;
+                if (!this.post_type) post_type = 'post';
+
+                let post_slug = this.post_slug;
                 if (!this.post_slug) post_slug = this.$route.params.post_slug;
 
-                this.getPost(post_slug);
+                this.getPost(post_type, post_slug);
                 this.isSingle = true;
 
             }else{  // Likely an Excerpt in an Archive
@@ -58,16 +61,24 @@
 
         },
 
-
         methods: {
-            getPost: function(post_slug) {
-                this.$http.get(wp.root + 'wp/v2/post/?slug=' + post_slug).then(function(response) {
-                    this.singlePost = response.data[0];
-                    this.$emit('page-title', response.data[0].title.rendered);
+            getPost: function(post_type, post_slug) {
+                this.$http.get(wp.root + 'wp/v2/'+post_type+'/?slug=' + post_slug).then(function(response) {
+
+                    if( response.data.length == 0 ){
+                      this.singlePost.title.rendered = "Not Found";
+                      this.singlePost.content.rendered = "We could not find anything that matched this request.";
+
+                    } else {
+                      this.singlePost = response.data[0];
+                      this.$emit('page-title', response.data[0].title.rendered);
+                    }
+
                 }, function(response) {
                     console.log(response);
                 });
             }
         }
+
     }
 </script>

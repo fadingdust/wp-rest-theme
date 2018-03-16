@@ -26,9 +26,11 @@ class WP_Vue_Router_Context{
 
     // TODO: cache these lists:
         $this->build_context_for_pages();
+        $this->build_context_for_custom_post_types();   //Prefer post types over taxonomies
         $this->build_context_for_taxonomies();
-        $this->build_context_for_custom_post_types();
         $this->build_context_for_defaults();
+
+        //TODO: Add a warning / filter for duplicate/conflicting routes?
     }
     public function __destruct(){
         unset($this->routes);
@@ -66,20 +68,19 @@ class WP_Vue_Router_Context{
         $blog_home_id = get_option( 'page_for_posts' );
 
         // PAGES
-        $this_type = "page";
+        $component_name = "page";
         $pages = get_pages();
         $domain = get_option('home');
 
         foreach ( $pages as $page ) {
             // Routes[] = { path: '/gallery/', component: Archive}
-            $full_path=str_replace(array($domain, 'http://'.$_SERVER['HTTP_HOST']),'', get_the_permalink($page->ID) );
-            $page_template_slug = str_replace(".php", "", get_page_template_slug( $page->ID ) );   // aka: get_post_meta( $post->ID, '_wp_page_template', true )
-            if($page_template_slug) $this_type = basename($page_template_slug);
+            $full_path=str_replace( array($domain, 'https://', 'http://', $_SERVER['HTTP_HOST']), '', get_the_permalink($page->ID) ); //Pare off what the registered wp domain, but also any other domain this might be run on
+            $page_template_slug = str_replace(".php", "", get_page_template_slug( $page->ID ) );
+            if($page_template_slug) $component_name = basename($page_template_slug);
 
             if( $page->ID == $blog_home_id){
-                $route = $full_path;
                 $thisRoute=new stdClass();
-                  $thisRoute->path = $route;
+                  $thisRoute->path = $full_path;
                   $thisRoute->component = "Blog";
                   //Export
                 $routes[] = $thisRoute;
@@ -87,9 +88,8 @@ class WP_Vue_Router_Context{
                 $thisRoute=null;
 
             } else if( $page->ID == $frontpage_id){
-                $route = $full_path;
                 $thisRoute=new stdClass();
-                  $thisRoute->path = $route;
+                  $thisRoute->path = $full_path;
                   $thisRoute->component = "Home";
                   $thisRoute->params = array("post_slug"=>$page->post_name);
                   //Add in extra meta, since '/' is a terrible slug (and inaccurate)
@@ -103,13 +103,10 @@ class WP_Vue_Router_Context{
                 $component_templates[] = $thisRoute->component;
                 $thisRoute=null;
 
-            } else {    //Handle these later under parentPages
-            //                $route = str_replace($page->post_name, ":post_slug", $full_path);    //get page-slug from full-path, usually the last in domain.com/1/2/3/last/
-
-                $route = $full_path;
+            } else {    //Handle these later under parentPages?
                 $thisRoute=new stdClass();
-                  $thisRoute->path = $route;
-                  $thisRoute->component = $this->template_name_cleanup($this_type);   //TemplateName OR Page
+                  $thisRoute->path = $full_path;
+                  $thisRoute->component = $this->template_name_cleanup($component_name);   //TemplateName OR Page
                   //Add in extra meta
                   $thisRoute->props = new stdClass();
                   $thisRoute->props->default = true;
@@ -134,17 +131,18 @@ class WP_Vue_Router_Context{
         $component_templates = [];
 
         //Taxonomies: tax/term
-        $this_type = "archive";
+        $component_name = "archive";
         $terms=[];
         $taxonomies = get_taxonomies(array('public'=>true), 'objects');     // publically routable in WP
 
         foreach ( $taxonomies as $taxonomy ) {
             $thisRoute=new stdClass();
               $thisRoute->path = "/".$taxonomy->rewrite['slug']."/:term_slug/"; //rewrite['slug']
-              $thisRoute->component=$this->template_name_cleanup($this_type);
-              //Add in extra meta, since '/' is a terrible slug (and inaccurate)
+              $thisRoute->component=$this->template_name_cleanup($component_name);
+              //Add in extra meta
               $thisRoute->props = new stdClass();
               $thisRoute->props->default = true;
+              $thisRoute->props->post_type = 'post';  // BUG: ???
               $thisRoute->props->taxonomy_name = $taxonomy->name;   //rewrite['slug'];
               $thisRoute->props->taxonomy_slug = $taxonomy->rewrite['slug'];
               //TODO: Consider adding tax-id?
@@ -155,12 +153,14 @@ class WP_Vue_Router_Context{
 
             // PAGED ARCHIVE:
             $thisRoute=new stdClass();
+            $thisRoute->name = 'Taxonomy-'.ucwords($taxonomy->name);
             $thisRoute->path = "/".$taxonomy->rewrite['slug']."/:term_slug/page/:paged_index([\d]*)/"; // rewrite['slug']
-            $thisRoute->component=$this->template_name_cleanup($this_type);
+            $thisRoute->component=$this->template_name_cleanup($component_name);
               //Add in extra meta
             $thisRoute->props = new stdClass();
             $thisRoute->props->default = true;
-            $thisRoute->props->post_type = $this_type;
+            $thisRoute->props->post_type = 'post';  // BUG: ???
+            $thisRoute->props->post_types = $taxonomy->object_type;
             $thisRoute->props->taxonomy_name = $taxonomy->name;   //rewrite['slug'];
             $thisRoute->props->taxonomy_slug = $taxonomy->rewrite['slug'];
 
@@ -169,21 +169,25 @@ class WP_Vue_Router_Context{
             $component_templates[] = $thisRoute->component;
             $thisRoute=null;
 
-            $terms[$taxonomy->name] = get_terms( array( 'taxonomy' => $taxonomy->name ) );
+            $terms[$taxonomy->name] = get_terms( array( 'taxonomy' => $taxonomy->name) );
         }
 
           //Single Post in Categories/Terms..
-        $this_type = "post";    //aka single
-        foreach ( $terms as $term_tax ) {
-        foreach ( $term_tax as $term ) {
+        foreach ( $terms as $tax_name=>$term_tax ) {
+        foreach ( $term_tax as $i=>$term ) {
             $thisRoute=new stdClass();
+              $thisRoute->name = 'TaxonomyTermPost-'.ucwords($taxonomy->name).'-'.ucwords($term->slug).'-post';
               $thisRoute->path = "/".$term->slug."/:post_slug/";
-              $thisRoute->component=$this->template_name_cleanup($this_type);
+              $thisRoute->component=$this->template_name_cleanup('post');
               //Add in extra meta
+
             $thisRoute->props = new stdClass();
             $thisRoute->props->default = true;
-            $thisRoute->props->post_type = $this_type;
+            $thisRoute->props->post_type = 'post';
             $thisRoute->props->term_slug = $term->slug;
+            $thisRoute->props->taxonomy_name = $tax_name;
+            $thisRoute->props->post_types = $term->post_types;
+
               //TODO: Consider adding term-id?
 
               //Export
@@ -193,12 +197,13 @@ class WP_Vue_Router_Context{
 
             // Just the Term, no Post => /tax/term archive. Should likely be a redirect.
             $thisRoute=new stdClass();
+              $thisRoute->name = 'TaxonomyTerm-'.'?'.'-'.ucwords($term->slug);
               $thisRoute->path = "/".$term->slug."/";
               $thisRoute->component=$this->template_name_cleanup('archive');
               //Add in extra meta
             $thisRoute->props = new stdClass();
             $thisRoute->props->default = true;
-            $thisRoute->props->post_type = 'archive';
+            $thisRoute->props->post_type = 'post';  //BUG: ??
             $thisRoute->props->term_slug = $term->slug;
             $thisRoute->props->taxonomy_name = $term->taxonomy;   //rewrite['slug'];
             $thisRoute->props->taxonomy_id = $term->taxonomy_id;   //rewrite['slug'];
@@ -232,13 +237,13 @@ class WP_Vue_Router_Context{
         $operator = 'and'; // 'and' or 'or'
 
         $post_types = get_post_types( $args, $output, $operator );
-        $this_type='post';  //Single, likely.
+        $component_name='post';  //Single, likely.
         foreach ( $post_types  as $post_type ) {
             // DEFAULT ARCHIVE route:
             $thisRoute=new stdClass();
+            $thisRoute->name = 'PostTypeTaxonomy-'.$post_type.'-post';
             $thisRoute->path = "/".$post_type."/:post_slug/";
-            //for known parent-paths.. hmm..
-            $thisRoute->component = $this->template_name_cleanup($this_type);
+            $thisRoute->component = $this->template_name_cleanup($component_name);
               //Add in extra meta
             $thisRoute->props = new stdClass();
             $thisRoute->props->default = true;
@@ -285,10 +290,10 @@ class WP_Vue_Router_Context{
 
         // DEFAULT: Non-Parent Post
         //don't want this higher than the blog-post-home, nor /year/
-        $this_type = "page";  //TODO: front-page!
+        $component_name = "page";  //TODO: front-page!
         $thisRoute=new stdClass();
         $thisRoute->path='/:post_slug';
-        $thisRoute->component=$this->template_name_cleanup($this_type);
+        $thisRoute->component=$this->template_name_cleanup($component_name);
           //Add in extra meta
         $thisRoute->props = new stdClass();
         $thisRoute->props->default = true;
