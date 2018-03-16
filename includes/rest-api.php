@@ -56,7 +56,7 @@ add_action( "rest_api_init", function () {
             foreach((get_the_category($post['id'])) as $category) {
                 $cats[] = array_merge( (array)$category, array('link'=>get_category_link($category->term_id))  );
             }
-            return $cats; //get_the_category($post['id']); //$cats; //get_the_category($post['id']);
+            return $cats;
         },
         "schema" => array(
             "description" => __( "Categories Detail" ),
@@ -73,7 +73,7 @@ add_action( "rest_api_init", function () {
                 "url"=>wp_get_attachment_image_src( get_post_thumbnail_id( $post['id']), 'full', false  ),
                 "url_large"=>wp_get_attachment_image_src( get_post_thumbnail_id( $post['id']), 'large'  , false),
                 "url_square"=>wp_get_attachment_image_src( get_post_thumbnail_id( $post['id']), 'square' , false ),
-//                "image_sizes"=>get_intermediate_image_sizes()
+
               );
         },
         "schema" => array(
@@ -119,26 +119,3 @@ function wp_rest_custom_taxonomy() {
   }
 
 }
-
-/**
- * Add an 'author/author_name' endpoint
- * /
-
-add_action( 'rest_api_init', function () {
-  register_rest_route( 'vue/v1', '/author/(?P<author_name>[\w-]+)', array(
-    'methods' => 'GET',
-    'callback' => 'author_posts_list',
-  ) );
-} );
-function author_posts_list( $data ) {
-  $posts = get_posts( array(
-    'author_name' => $data['author_name'],
-  ) );
-
-  if ( empty( $posts ) ) {
-    return new WP_Error( 'author_posts_list', 'no posts by author', array( 'status' => 404 ) );
-  }
-
-  return $posts;
-}
-/**/
