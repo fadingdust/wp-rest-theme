@@ -19,6 +19,14 @@ If the links below were in a `<router-link :to=""/>` it should load within Vue, 
 
 /category/category-three/
 
+## Custom PostTypes
+/custom-post-type/ (/news/)
+
+/custom-post-type/post-name/ (/news/news-item-1)
+
+/custom-taxonomy/custom-term/ (/news_type/breaking)
+
+
 ### ArchiveDate:
 /2017/10/
 
@@ -33,6 +41,23 @@ If the links below were in a `<router-link :to=""/>` it should load within Vue, 
 
 ### 404:
 /XYZ
+
+### TODO:
+/2017/10/post-name (wordpress redirects)
+
+/custom-taxonomy/ (404)
+
+/custom-post-type-post-name/ (404)
+
+/custom-term/post-name/ (wordpress redirects to /custom-post-type/post-name/)
+
+/custom-post-type/custom-term/  (Considers 'custom-term' a post_slug)
+
+/custom-post-type/custom-taxonomy/ (Considers 'custom-term' a post_slug)
+
+/custom-post-type/custom-taxonomy/custom-term/
+
+/custom-post-type/custom-taxonomy/custom-term/post-name/
 
 
 ## Alternatively, this code could be dropped into the theme-footer.vue
