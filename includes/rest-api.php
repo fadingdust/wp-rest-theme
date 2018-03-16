@@ -6,6 +6,12 @@ add_filter( 'rest_pre_serve_request', function( $value ) {
     return $value;
 });
 
+// Cache REST queries. Insta-load!
+add_filter( 'rest_pre_serve_request', function( $result ) {
+	header( 'Cache-Control: public, max-age=1200' ); // 20 minutes
+	return $result;
+} );
+
 
 // WP-API Post Responses:
 add_action( "rest_api_init", function () {
