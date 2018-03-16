@@ -10,8 +10,18 @@ add_filter( 'rest_pre_serve_request', function( $value ) {
 // WP-API Post Responses:
 add_action( "rest_api_init", function () {
 
+    // CUSTOM POST TYPES
+    $post_types_args = array(
+       'public'   => true,
+       '_builtin' => false
+    );
+
+    $post_types = get_post_types( $post_types_args, 'names', 'and' );
+    $posts_post_types = array_merge( array( "post", "posts" ), $post_types);
+    $pages_posts_post_types = array_merge(array( "page", "pages", "post", "posts" ), $post_types);
+
     // Add date_rendered
-    register_rest_field( array( "post", "posts" ), "date_rendered", array(
+    register_rest_field( $posts_post_types, "date_rendered", array(
         "get_callback" => function( $post ) {
             return get_the_date('', $post->id);
         },
@@ -22,7 +32,7 @@ add_action( "rest_api_init", function () {
     ) );
 
     // Add permalink:
-    register_rest_field( array( "page", "pages", "post", "posts" ), "permalink_path", array(
+    register_rest_field( $pages_posts_post_types, "permalink_path", array(
         "get_callback" => function( $post ) {
             return str_replace(  home_url() , "", get_the_permalink($post->id) );
         },
@@ -33,7 +43,7 @@ add_action( "rest_api_init", function () {
     ) );
 
     // Add Author Info
-    register_rest_field( array( "post", "posts" ), "author_object", array(
+    register_rest_field( $posts_post_types, "author_object", array(
         "get_callback" => function( $post ) {
             return array(
                 'id'=>$post['author'],
@@ -50,7 +60,7 @@ add_action( "rest_api_init", function () {
 
 
     // Add category info to post-details, not just the category-ids
-    register_rest_field( array( "post", "posts" ), "categories_list", array(
+    register_rest_field( $posts_post_types, "categories_list", array(
         "get_callback" => function( $post ) {
             $cats=array();
             foreach((get_the_category($post['id'])) as $category) {
@@ -66,7 +76,7 @@ add_action( "rest_api_init", function () {
 
 
     // Add featured_image url to post-details, not just the media-id
-    register_rest_field( array( "page", "pages", "post", "posts" ), "featured_image", array(
+    register_rest_field(  $pages_posts_post_types, "featured_image", array(
         "get_callback" => function( $post ) {
             return (object) array(
                 "html"=>get_the_post_thumbnail( $post['id'], 'large' ),
