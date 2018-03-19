@@ -24,7 +24,7 @@ a:hover, a:focus {
 	text-decoration: underline;
 }
 
-#content { display: none; }
+#content { }
 
 .container {
 	max-width: 960px;

@@ -13,7 +13,10 @@ function rest_theme_scripts() {
 
 	$wp_vue= new WP_Vue_Router_Context();
 
+//To Localize Upon:
 	wp_enqueue_script( 'rest-theme-vue', get_template_directory_uri() . '/rest-theme/dist/build.js', array(), '1.0.0', true );
+
+//Localize Routes
 	wp_localize_script( 'rest-theme-vue', 'wp', array(
 		'root'      => esc_url_raw( rest_url() ),
 		'base_url'  => $base_url,
@@ -23,6 +26,7 @@ function rest_theme_scripts() {
 		'components'=> $wp_vue->get_components(),
 		'routes'    => $wp_vue->get_routes(),
 	) );
+
 }
 
 add_action( 'wp_enqueue_scripts', 'rest_theme_scripts' );
