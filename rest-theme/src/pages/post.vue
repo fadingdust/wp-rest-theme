@@ -13,6 +13,7 @@
 </template>
 
 <script>
+    import WordpressService from '../services/wordpress';
 
     export default {
         props: {
@@ -33,6 +34,8 @@
 
         data: function() {
             return {
+                loading: true,
+                error: false,
                 base_path: wp.base_path,
                 isSingle: false,
                 singlePost: {
@@ -63,20 +66,24 @@
 
         methods: {
             getPost: function(post_type, post_slug) {
-                this.$http.get(wp.root + 'wp/v2/'+post_type+'/?slug=' + post_slug).then(function(response) {
+                const wpPromisedResult = WordpressService.getPostBySlug( post_type, post_slug );
+                wpPromisedResult.then(result => {
+                      console.log("PostSlug Found!", result.posts, result.totalPages);
+                      this.loading = false;
 
-                    if( response.data.length == 0 ){
-                      this.singlePost.title.rendered = "Not Found";
-                      this.singlePost.content.rendered = "We could not find anything that matched this request.";
+                      if( result.posts.length == 0){
+                          this.error = true; //alternate content control too
+                          console.log("PostSlug Found, no data");
+                      }else{
+                          this.singlePost = result.posts[0];
+                      }
 
-                    } else {
-                      this.singlePost = response.data[0];
-                      this.$emit('page-title', response.data[0].title.rendered);
-                    }
+                  })
+                  .catch(err => {
+                    this.error = true;
 
-                }, function(response) {
-                    console.log(response);
-                });
+                    console.log("PostSlug Error!", wpPromisedResult);
+                  });
             }
         }
 
