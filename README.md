@@ -9,8 +9,6 @@ demonstrate how to create a [single page application](https://en.wikipedia.org/w
 
 ### Requirements
 
-* [WordPress REST API plugin (v2)](https://wordpress.org/plugins/rest-api)
-
 ### Usage
 
 To use the theme on your WordPress site just install it like any other theme.
