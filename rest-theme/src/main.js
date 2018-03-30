@@ -1,19 +1,15 @@
 import Vue from 'vue/dist/vue.js'
 
-import router from './router.js';
-
-
-import Header from './components/theme-header.vue';
-Vue.component('theme-header', Header);
+import router from './router.js'
 
 import Footer from './components/theme-footer.vue';
 Vue.component('theme-footer', Footer);
 
-
 var App = new Vue({
     el: '#app',
     router: router,
-    template: '<div id="app-root"><theme-header></theme-header>' +
+
+    template: '<div id="app-root">' +
               '<div class="container"><router-view :key="this.$route.fullPath"></router-view></div>' +
               '<theme-footer></theme-footer></div>',
 
@@ -45,4 +41,21 @@ var App = new Vue({
 function capitalize(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
 }
+
+///////////////////////////////////////////////////////////////////////
+//  Fix the static nav <a> links to be <router-link>.
+///////////////////////////////////////////////////////////////////////
+jQuery( "a[href^='"+wp.basePath+"'], a[href^='/']:not([href*='#'])"  ).on("click", function(event){
+    event.preventDefault();
+    var linkPath = jQuery(this).attr("href").replace(wp.siteurl,'');
+    var resolvedRoute = router.resolve(linkPath);
+
+    $(".site-header li").removeClass('current-menu-item');
+    $(this).parent("li").addClass('current-menu-item');
+
+
+    console.log('clicked', wp.base_path, linkPath,  resolvedRoute);
+    router.replace( resolvedRoute.route );
+}); // click
+
 

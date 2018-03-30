@@ -41,6 +41,8 @@ If the links below were in a `<router-link :to=""/>` it should load within Vue, 
 
 ### 404:
 /XYZ
+/X/Y
+/X/Y/Z ...
 
 ### TODO:
 /2017/10/post-name (wordpress redirects)

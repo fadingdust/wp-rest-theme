@@ -30,7 +30,10 @@ Vue.component('Page', Page);
 
 
 var router = new VueRouter({
-  mode: 'history'
+  mode: 'history',
+  scrollBehavior (to, from, savedPosition) {
+    return { x: 0, y: 0 };  // scroll to top on-router-link click
+  }
 });
 
 router.addRoutes([ {
@@ -40,8 +43,11 @@ router.addRoutes([ {
 
 // Convert the Routes made in PHP/Wordpress into actual Component Objects
 for (var key in wp.routes) {
-    var route = wp.routes[key];
-    wp.routes[key].component = Vue.component( route.component );
+    let route = wp.routes[key];
+    let component_name = route.component;
+    wp.routes[key].component = Vue.component( component_name );
+
+    if( typeof(wp.routes[key].component) == "undefined" ) console.log("Developer: Please create component named " + component_name );
 }
 router.addRoutes( wp.routes );
 

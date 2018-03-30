@@ -37,6 +37,23 @@ add_action( "rest_api_init", function () {
         ),
     ) );
 
+
+    // Add date_link_path
+    register_rest_field( $posts_post_types, "date_archive", array(
+        "get_callback" => function( $post ) {
+            $year = get_the_date('Y', $post->id);;
+            $month = get_the_date('m', $post->id);;
+
+            $url=get_month_link( $year, $month);
+
+            return array( 'path'=> str_replace(  home_url() , "", $url ) , 'link'=>$url, 'year'=>$year, 'month'=>$month );
+        },
+        "schema" => array(
+            "description" => __( "Date Path for VueRouter" ),
+            "type"        => "string"
+        ),
+    ) );
+
     // Add permalink:
     register_rest_field( $pages_posts_post_types, "permalink_path", array(
         "get_callback" => function( $post ) {
@@ -48,14 +65,32 @@ add_action( "rest_api_init", function () {
         ),
     ) );
 
+    // Add permalink to terms:
+    register_rest_field( array('category','term'), "permalink_path", array(
+        "get_callback" => function( $term ) {
+            return str_replace(  home_url() , "", $term['link'] );
+        },
+        "schema" => array(
+            "description" => __( "Permalink Path" ),
+            "type"        => "string"
+        ),
+    ) );
+
     // Add Author Info
     register_rest_field( $posts_post_types, "author_object", array(
         "get_callback" => function( $post ) {
+            $user_id = $post['author'];
+            $all_meta_for_user =  array_map( function( $a ){ return $a[0]; }, get_user_meta( $user_id ) );
+            $author_posts_url = get_author_posts_url($post['author']);
             return array(
                 'id'=>$post['author'],
-                'name'=>get_the_author($post['author']),
-                'link_to_posts'=>get_author_posts_url($post['author'])
-                //'description'=>get_the_author_meta( 'description', $post['author'] )
+                'slug'=>get_the_author_meta('user_login', $post['author']),
+                'first_name'=>$all_meta_for_user['first_name'],
+                'last_name'=>$all_meta_for_user['last_name'],
+                'nickname'=>$all_meta_for_user['nickname'],
+                'description'=>$all_meta_for_user['description'],
+                'link_to_posts'=>$author_posts_url,
+                'permalink_path'=>str_replace(  home_url() , "", $author_posts_url )
             );
         },
         "schema" => array(
@@ -70,7 +105,8 @@ add_action( "rest_api_init", function () {
         "get_callback" => function( $post ) {
             $cats=array();
             foreach((get_the_category($post['id'])) as $category) {
-                $cats[] = array_merge( (array)$category, array('link'=>get_category_link($category->term_id))  );
+                $cat_link = get_category_link($category->term_id);
+                $cats[] = array_merge( (array)$category, array('link'=>$cat_link, 'permalink_path'=> str_replace(  home_url() , "", ($cat_link) ) )  );
             }
             return $cats;
         },
@@ -99,7 +135,7 @@ add_action( "rest_api_init", function () {
     ) );
 
 
-} );
+}, 3 );
 
 
 /**
