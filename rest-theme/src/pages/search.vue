@@ -3,9 +3,18 @@
 </style>
 
 <template>
-    <div class="posts search-archive">
-        <Post v-for="post in posts" :post="post" :key="post.id"></Post>
-    </div>
+<div class="page-wrapper">
+
+    <main class="content">
+        <h1 class="page-title" v-if="(term_slug)">Search Results for &ldquo;{{ term_slug }}&rdquo;</h1>
+
+        <div class="posts-wrapper search-archive">
+            <Post v-for="post in posts" :post="post" :key="post.id"></Post>
+        </div>
+
+    </main>
+
+</div>
 </template>
 
 <script>

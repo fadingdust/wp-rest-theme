@@ -3,9 +3,17 @@
 </style>
 
 <template>
-    <div class="posts">
-        <Post v-for="post in posts" :post="post" :key="post.id"></Post>
-    </div>
+<div class="page-wrapper">
+
+    <main class="content">
+        <h1 class="page-title">News</h1>
+
+        <div class="posts-wrapper">
+            <Post v-for="post in posts" :post="post" :key="post.id"></Post>
+        </div>
+    </main>
+
+</div>
 </template>
 
 <script>

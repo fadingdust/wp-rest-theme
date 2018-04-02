@@ -3,9 +3,17 @@
 </style>
 
 <template>
-    <div class="posts author-archive">
-        <Post v-for="post in posts" :post="post" :key="post.id" v-if="post"></Post>
-    </div>
+<div class="page-wrapper">
+
+    <main class="content">
+        <h1 class="page-title" v-if="(author)">Posts by {{ author.name }}</h1>
+
+        <div class="posts author-archive">
+            <Post v-for="post in posts" :post="post" :key="post.id" v-if="post"></Post>
+        </div>
+    </main>
+
+</div>
 </template>
 
 <script>

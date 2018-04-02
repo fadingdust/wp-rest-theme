@@ -3,16 +3,21 @@
 </style>
 
 <template>
-    <div class="page" v-if="(error)">
-      <h2>Not Found</h2>
-    </div>
-    <div class="page" v-else="(!error)">
-        <h1 class="entry-title">{{ page.title.rendered }}</h1>
-
-        <div class="entry-content" v-html="page.content.rendered">
+<div class="page-wrapper">
+    <main class="content">
+        <div class="page" v-if="(error)">
+          <h2>Not Found</h2>
         </div>
-    </div>
 
+        <article class="page" v-else="(!error)">
+            <h1 class="entry-title">{{ page.title.rendered }}</h1>
+
+            <div class="entry-content" v-html="page.content.rendered">
+            </div>
+        </article>
+    </main>
+
+</div>
 </template>
 
 <script>

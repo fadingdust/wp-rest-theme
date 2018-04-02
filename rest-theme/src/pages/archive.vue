@@ -3,9 +3,17 @@
 </style>
 
 <template>
-    <div class="posts">
-        <Post v-for="post in posts" :post="post" :key="post.id" v-if="post"></Post>
-    </div>
+<div class="page-wrapper">
+
+    <main class="content">
+        <h1 class="page-title" v-if="(term)">{{ term.name }}</h1>
+
+        <div class="posts-wrapper">
+            <Post v-for="post in posts" :post="post" :key="post.id" v-if="post"></Post>
+        </div>
+    </main>
+
+</div>
 </template>
 
 <script>
@@ -53,7 +61,7 @@
                   })
                   .catch(err => {
                     this.error = true;
-                    console.log("getTermInfo Error!", wpPromisedResult);
+                    console.log("getTermInfo Error!", err, wpPromisedResult);
                   });
 
             }, // getTermInfo
