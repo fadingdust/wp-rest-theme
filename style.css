@@ -10,7 +10,7 @@ License: MIT
 
 body {
 	font: 16px/1.6em 'Helvetica Neue', Helvetica, Arial, sans-serif;
-	background: #e6eaec;
+	background: #fff;
 	color: #34495e;
 }
 
@@ -24,7 +24,17 @@ a:hover, a:focus {
 	text-decoration: underline;
 }
 
-#content { display: none; }
+
+/* Layout/Styling */
+body>noscript,
+#app-root{
+  	background: #eee;
+  padding-top: 120px; /* clear the fixed-nav */
+  display: flex;
+  flex-flow: column;
+}
+
+#content { }
 
 .container {
 	max-width: 960px;
@@ -38,16 +48,118 @@ a:hover, a:focus {
 	padding: 30px 0;
 }
 
-.post,
-.page {
+article:after{
+  content:'';
+  display:block;
+  clear:both;
+}
+
+article,
+section {
 	background: #fff;
 	padding: 30px;
 	margin-bottom: 50px;
 	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
 
+/* Bootstrap: */
+.site-header .navbar-brand{
+  margin: 0;
+  padding: 0 15px 0 0;
+}
+.site-header .navbar-toggler{
+  padding: 15px 20px;
+  margin: 0;
+  border-radius: 0;
+  outline: 0;
+  border: 0;
+}
+.site-header .navbar-toggler.collapsed{
+  background:white;
+  outline: 0;
+}
+.site-header .navbar{ /* Goal is 80-ish px tall */
+  background: #fff;
+  padding: 0 15px; /* padding shows below drop-down nav*/
+  	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.4);
+}
+.navbar-collapse{
+  padding: 0px 15px;
+}
+.navbar-collapse>ul{
+  margin: 20px 0;
+}
+.menu-item.current-menu-item,
+.menu-item:hover{
+  background:#eee;
+}
+.menu-item.show{
+  background:#eee;
+}
+.navbar-nav .nav-link,
+.menu-item a{
+  padding-left: .5rem;
+  padding-right: .5rem;
+}
+.dropdown-menu.show{
+  margin:0;
+  border: 0;
+  border-radius: 0;
+}
+@media(min-width: 992px){
+.menu-item.dropdown.show a.dropdown-toggle,
+ul.dropdown-menu.show{
+  box-shadow: 0  2px 2px rgba( 100, 100, 100, .6 );
+}
+}
+@media(max-width: 991px){
+#app-root{ ppadding-top: 88px;}
+}
+
+/* Basic WordPress styling */
+
+.alignright{float:right;margin: 2px 0 8px 8px;}
+.alignleft{float:left;margin: 2px 8px 8px 0;}
+.wp-caption-text{margin-top:0;}
+
 .entry-title {
 	font-size: 30px;
 	line-height: 1.3em;
 	margin: 0 0 30px;
+}
+
+/* Basic App styling */
+
+.notifications{
+  height: 30px;
+  position: relative;
+	width: 40%;
+	min-width:240px;
+	margin: -31px auto 0px auto; /* hide it in the header's margin */
+
+}
+
+.notification {
+  position: absolute;
+	background: #fff;
+	width:100%;
+	top:-8px;
+	left:0;
+	padding: 20px 30px;
+	box-shadow: 0 2px 1px rgba(0, 0, 0, 0.4);
+	cursor: default;
+}
+
+/* animations: */
+.notification {
+  opacity: 0;
+  animation: fadeOut 1.2s linear backwards;
+}
+
+@keyframes fadeOut {
+	0% 	{ opacity: 0;z-index:999999 }
+	10% { opacity: 1; }
+	90% { opacity: 1; transform: translateY(0px);}
+	99% { opacity: 0; transform: translateY(-30px);}
+	100% { opacity: 0;z-index:-1 }
 }

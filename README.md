@@ -7,11 +7,16 @@ demonstrate how to create a [single page application](https://en.wikipedia.org/w
 
 ![](https://cloud.githubusercontent.com/assets/203882/12955214/ec10e59c-d019-11e5-9c15-403c1ba76ce9.gif)
 
-### Requirements
+### Demos
+This project has multiple branches. Each branch adds a feature overtop the prior branch. The history/progression is as follows:
+
+* [Vue-2](http://github.mwallace.info/vue-2/): Upgrades the original codebase to Vue 2.0+
+* [WP-Router](http://github.mwallace.info/wp-router/): Adds in an automatic routing for all Wordpress paths
+* TBD..
 
 ### Usage
 
-To use the theme on your WordPress site just install it like any other theme.
+To use the theme on your WordPress site just install it like any other theme, but you'll likely need to compile the dist/build.js file.
 
 ### Customization
 
@@ -28,8 +33,13 @@ To build the `dist/build.js` script before deploying run:
 npm run build
 ```
 
+### Testing
+
+[List of supported URIs](docs/TESTING.md)
 
 ### History
+* 2018-04: Using native WP Nav, subdirectory installs safe.
+* 2018-03: WordpressRoute Builder added
 * 2018-03: Vue 2.0 Compatible (@MW)
 * 2016-02: Vue 1.0 Based (@GP)
 
@@ -45,5 +55,5 @@ Some of the libraries used in the making of this theme:
 * [Browserify](http://browserify.org)
 * [normalize.css](https://necolas.github.io/normalize.css)
 
-The WP REST Theme was created by [Gilbert Pellegrom](http://gilbert.pellegrom.me) from
+The WP REST Theme was originally created by [Gilbert Pellegrom](http://gilbert.pellegrom.me) from
 [Dev7studios](http://dev7studios.com). Released under the MIT license.

@@ -1,43 +1,16 @@
 import Vue from 'vue/dist/vue.js'
-import VueRouter from 'vue-router'
 
-Vue.use(require('vue-resource'));
-Vue.use(VueRouter);
+import router from './router.js'
 
-Vue.config.debug = true
+import Footer from './components/theme-footer.vue';
+Vue.component('theme-footer', Footer);
 
-import Posts from './posts.vue'
-import Post from './post.vue'
-Vue.component('Post', Post)
-import Page from './page.vue'
-Vue.component('Page', Page)
-import Header from './theme-header.vue'
-Vue.component('theme-header', Header)
-import Footer from './theme-footer.vue'
-Vue.component('theme-footer', Footer)
-
-var router = new VueRouter({
-  mode: 'history'
-});
-
-router.addRoutes([ {
-    path: wp.base_path,
-    component: Posts
-}]);
-
-for (var key in wp.routes) {
-    var route = wp.routes[key];
-    router.addRoutes([ {
-        path: wp.base_path + route.slug,
-        component: Vue.component(capitalize(route.type)),
-        props: {default: true, postId: route.id}
-    }]);
-}
-
-var App = new Vue({
+//var App =
+new Vue({
     el: '#app',
     router: router,
-    template: '<div id="app-root"><theme-header></theme-header>' +
+
+    template: '<div id="app-root">' +
               '<div class="container"><router-view :key="this.$route.fullPath"></router-view></div>' +
               '<theme-footer></theme-footer></div>',
 
@@ -51,6 +24,14 @@ var App = new Vue({
         }
     },
 
+    updated: function(){
+
+        this.$nextTick(function () {
+            // Handy function for when all children
+
+        });
+    },
+
     events: {
         'page-title': function(pageTitle) {
             this.updateTitle(pageTitle);
@@ -58,6 +39,24 @@ var App = new Vue({
     }
 });
 
-function capitalize(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
+
+///////////////////////////////////////////////////////////////////////
+//  Fix the static nav <a> links to be <router-link>.
+///////////////////////////////////////////////////////////////////////
+jQuery( "a[href^='"+wp.base_path+"'], a[href^='/']:not([href*='#'])"  ).on("click", function(event){
+    event.preventDefault();
+
+  //Decide which route:
+    var linkPath = ( jQuery(this).attr("href").indexOf(wp.base_url) > -1) ? jQuery(this).attr("href").replace(wp.base_url,'/') : jQuery(this).attr("href").replace(wp.base_path,'/');
+
+  // Actually change the path now:
+    router.replace( linkPath ); //resolvedRoute.route.fullPath );
+
+  //UI Stuff:
+    jQuery(".site-header .navbar-collapse").collapse('hide');  //hide the nav.
+    jQuery(".site-header li").removeClass('current-menu-item');
+    jQuery(this).parent("li").addClass('current-menu-item');
+
+}); // click
+
+
