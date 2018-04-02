@@ -48,17 +48,15 @@ jQuery( "a[href^='"+wp.base_path+"'], a[href^='/']:not([href*='#'])"  ).on("clic
 
   //Decide which route:
     var linkPath = ( jQuery(this).attr("href").indexOf(wp.base_url) > -1) ? jQuery(this).attr("href").replace(wp.base_url,'/') : jQuery(this).attr("href").replace(wp.base_path,'/');
-    var resolvedRoute = router.resolve(linkPath);
 
-    console.log('clicked', wp.base_path, linkPath,  resolvedRoute);
+  // Actually change the path now:
+    router.replace( linkPath ); //resolvedRoute.route.fullPath );
 
   //UI Stuff:
     jQuery(".site-header .navbar-collapse").collapse('hide');  //hide the nav.
     jQuery(".site-header li").removeClass('current-menu-item');
     jQuery(this).parent("li").addClass('current-menu-item');
 
-  // Actually change the path now:
-    router.replace( resolvedRoute.route );
 }); // click
 
 
