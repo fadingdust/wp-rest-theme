@@ -59,12 +59,12 @@
             getPosts: function() {
                 const wpPromisedResult = WordpressService.getAuthorPosts( this.author.id );
                 wpPromisedResult.then(result => {
-                      console.log("PostSlug Found!", result.posts, result.totalPages);
+                      console.log("Author Posts Found!", result.posts, result.totalPages);
                       this.loading = false;
 
                       if( result.posts.length == 0){
                           this.error = true; //alternate content control too
-                          console.log("PostSlug Found, no data");
+                          console.log("Author Posts Found, no data");
                       }else{
                           this.posts = result.posts;
                       }
@@ -73,7 +73,7 @@
                   .catch(err => {
                     this.error = true;
 
-                    console.log("PostSlug Error!", wpPromisedResult);
+                    console.log("Author Posts Error!", wpPromisedResult);
                   });
             }
 

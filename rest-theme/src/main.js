@@ -5,7 +5,8 @@ import router from './router.js'
 import Footer from './components/theme-footer.vue';
 Vue.component('theme-footer', Footer);
 
-var App = new Vue({
+//var App =
+new Vue({
     el: '#app',
     router: router,
 
@@ -38,23 +39,25 @@ var App = new Vue({
     }
 });
 
-function capitalize(string) {
-    return string.charAt(0).toUpperCase() + string.slice(1);
-}
 
 ///////////////////////////////////////////////////////////////////////
 //  Fix the static nav <a> links to be <router-link>.
 ///////////////////////////////////////////////////////////////////////
-jQuery( "a[href^='"+wp.basePath+"'], a[href^='/']:not([href*='#'])"  ).on("click", function(event){
+jQuery( "a[href^='"+wp.base_path+"'], a[href^='/']:not([href*='#'])"  ).on("click", function(event){
     event.preventDefault();
-    var linkPath = jQuery(this).attr("href").replace(wp.siteurl,'');
+
+  //Decide which route:
+    var linkPath = ( jQuery(this).attr("href").indexOf(wp.base_url) > -1) ? jQuery(this).attr("href").replace(wp.base_url,'/') : jQuery(this).attr("href").replace(wp.base_path,'/');
     var resolvedRoute = router.resolve(linkPath);
 
-    $(".site-header li").removeClass('current-menu-item');
-    $(this).parent("li").addClass('current-menu-item');
-
-
     console.log('clicked', wp.base_path, linkPath,  resolvedRoute);
+
+  //UI Stuff:
+    jQuery(".site-header .navbar-collapse").collapse('hide');  //hide the nav.
+    jQuery(".site-header li").removeClass('current-menu-item');
+    jQuery(this).parent("li").addClass('current-menu-item');
+
+  // Actually change the path now:
     router.replace( resolvedRoute.route );
 }); // click
 

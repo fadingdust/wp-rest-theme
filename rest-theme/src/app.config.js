@@ -1,7 +1,7 @@
 'use strict'
 
 const Config = {
-  root: 'http://local.vuewp.com/',
+  root: wp.base_url+'/',
 //  client: 'http://local.vuewp.com/',
 //  loadDbName: 'vwpLocal',
 //  analyticsPath: '//www.google-analytics.com/analytics.js'

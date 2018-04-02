@@ -31,13 +31,14 @@ Vue.component('Page', Page);
 
 var router = new VueRouter({
   mode: 'history',
+  base: wp.base_path,
   scrollBehavior (to, from, savedPosition) {
     return { x: 0, y: 0 };  // scroll to top on-router-link click
   }
 });
 
 router.addRoutes([ {
-    path: wp.base_path,
+    path: '/',
     component: Home
 }]);
 

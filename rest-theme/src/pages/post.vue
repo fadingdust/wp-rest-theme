@@ -25,7 +25,7 @@ article img{
 
         <footer>
           <div class="entry-meta">
-          <!--
+
             <p class="author-info"><span>Written by</span>
               <span class="author" v-if="(this_post.author_object)">
                 <router-link :to="{ path: this_post.author_object.permalink_path }">{{this_post.author_object.nickname}}</router-link>
@@ -43,7 +43,7 @@ article img{
                 <router-link :to="{ path: category.permalink_path }">{{category.name}}</router-link>
               </span>
             </p>
-            -->
+
 
           </div>
         </footer>
