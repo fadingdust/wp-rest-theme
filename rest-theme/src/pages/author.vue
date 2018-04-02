@@ -41,6 +41,7 @@
 
                       if( result.authors.length == 0 ) this.error = true;
 
+                      let userIndex = 0;
                       for(userIndex in result.authors){
                         if(result.authors[userIndex].slug == author_slug){
                           this.author = result.authors[userIndex];
@@ -52,8 +53,9 @@
                   })
                   .catch(err => {
                     this.error = true;
-                    console.log("getAuthor Error!", wpPromisedResult);
+                    console.log("getAuthor Error!", err, wpPromisedResult);
                   });
+
             },
 
             getPosts: function() {

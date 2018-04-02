@@ -59,7 +59,7 @@
             }, // getTermInfo
 
             getPostsByTerm: function(taxonomy_name, term_id) {
-
+                let post_type_index = 0;
                 for(post_type_index in this.post_types){
 
                     const wpPromisedResult = WordpressService.getTermPosts( this.post_types[post_type_index], taxonomy_name, term_id);
@@ -74,7 +74,7 @@
                       })
                       .catch(err => {
                         this.error = true;
-                        console.log("getPostsByTerm Error!", wpPromisedResult);
+                        console.log("getPostsByTerm Error!", err, wpPromisedResult);
                       });
 
                 }//for

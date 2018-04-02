@@ -40,7 +40,7 @@ article img{
 
             <p class="category-list"><span>in categories</span>
               <span class="category" v-for="category in this_post.categories_list" v-bind:key="category.id">
-                <router-link :to="{ path: category.permalink_path }">{{category.name}}</router-link>
+                <router-link :to="{ path: category.permalink_path }">{{category.name}}</router-link>&nbsp;
               </span>
             </p>
 
