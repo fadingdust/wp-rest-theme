@@ -5,11 +5,11 @@
 <template>
 <div class="page-wrapper">
     <main class="content">
-        <div class="page" v-if="(error)">
-          <h2>Not Found</h2>
-        </div>
 
-        <article class="page" v-else="(!error)">
+        <loading v-if="(loading)"></loading>
+        <not-found v-if="(!loading && error)"></not-found>
+
+        <article class="page" v-if="(page.id > 0)">
             <h1 class="entry-title">{{ page.title.rendered }}</h1>
 
             <div class="entry-content" v-html="page.content.rendered">
@@ -23,7 +23,14 @@
 <script>
     import WordpressService from '../services/wordpress';
 
+    import NotFound from '../components/not-found.vue';
+    import Loading from '../components/loading.vue';
+
     export default {
+        components: {
+          NotFound, Loading
+        },
+
         props: ['post_slug'],
 
         data() {

@@ -84,6 +84,7 @@ class WP_Vue_Router_Context{
 
             if( $page->ID == $blog_home_id){
                 $thisRoute=new stdClass();
+                $thisRoute->name = 'Blog';
                   $thisRoute->path = $full_path;
                   $thisRoute->component = "Blog";
                   //Export
@@ -91,9 +92,27 @@ class WP_Vue_Router_Context{
                 $component_templates[] = $thisRoute->component;
                 $thisRoute=null;
 
+                // PAGED BLOG:
+                $thisRoute=new stdClass();
+                $thisRoute->name = 'Blog-Paged';
+                $thisRoute->path = $full_path."page/:paged_index([\d]*)/"; // rewrite['slug']
+                $thisRoute->component="Blog"; //$this->template_name_cleanup($component_name);
+                  //Add in extra meta
+                $thisRoute->props = new stdClass();
+                $thisRoute->props->default = true;
+                $thisRoute->props->post_type = 'post';  // BUG: ???
+                $thisRoute->props->post_types = 'post'; //$taxonomy->object_type;
+                  //Export
+                $routes[] = $thisRoute;
+                $component_templates[] = $thisRoute->component;
+                $thisRoute=null;
+
+
+
             } else if( $page->ID == $frontpage_id){
                 $thisRoute=new stdClass();
                   $thisRoute->path = $full_path;
+                  $thisRoute->name = 'Home';
                   $thisRoute->component = "Home";
                   $thisRoute->params = array("post_slug"=>$page->post_name);
                   //Add in extra meta, since '/' is a terrible slug (and inaccurate)
@@ -141,7 +160,7 @@ class WP_Vue_Router_Context{
 
         foreach ( $taxonomies as $taxonomy ) {
             $thisRoute=new stdClass();
-              $thisRoute->name = 'Taxonomy-'.ucwords($taxonomy->name)."-Post";
+              $thisRoute->name = 'Taxonomy-'.ucwords($taxonomy->name)."-Archive";
               $thisRoute->path = "/".$taxonomy->rewrite['slug']."/:term_slug/"; //rewrite['slug']
               $thisRoute->component=$this->template_name_cleanup($component_name);
               //Add in extra meta
@@ -159,7 +178,7 @@ class WP_Vue_Router_Context{
 
             // PAGED ARCHIVE:
             $thisRoute=new stdClass();
-            $thisRoute->name = 'Taxonomy-'.ucwords($taxonomy->name).'-Paged';
+            $thisRoute->name = 'Taxonomy-'.ucwords($taxonomy->name).'-Archive-Paged';
             $thisRoute->path = "/".$taxonomy->rewrite['slug']."/:term_slug/page/:paged_index([\d]*)/"; // rewrite['slug']
             $thisRoute->component=$this->template_name_cleanup($component_name);
               //Add in extra meta
@@ -305,16 +324,17 @@ class WP_Vue_Router_Context{
 
         // WP Defaults:
         $wp_defaults = json_decode('[
-            { "path": "/search/:term_slug/page/:paged_index/", "component": "Search", "props": true},
-            { "path": "/search/:term_slug/", "component": "Search", "props": true},
-            { "path": "/author/:author_slug/page/:paged_index/", "component": "Author", "props": true},
-            { "path": "/author/:author_slug/", "component": "Author", "props": true},
-            { "path": "/:year/:month/:day/page/:paged_index/", "component": "ArchiveDate", "props": true},
-            { "path": "/:year/:month/:day/", "component": "ArchiveDate", "props": true},
-            { "path": "/:year/:day/page/:paged_index/", "component": "ArchiveDate", "props": true},
-            { "path": "/:year/:day/", "component": "ArchiveDate", "props": true},
-            { "path": "/:year/page/:paged_index/", "component": "ArchiveDate", "props": true},
-            { "path": "/:year/", "component": "ArchiveDate", "props": true}]');
+            { "name":"Search-Archive-Paged", "path": "/search/:term_slug/page/:paged_index/", "component": "Search", "props": true},
+            { "name":"Search-Archive", "path": "/search/:term_slug/", "component": "Search", "props": true},
+            { "name":"Author-Archive-Paged", "path": "/author/:author_slug/page/:paged_index/", "component": "Author", "props": true},
+            { "name":"Author-Archive", "path": "/author/:author_slug/", "component": "Author", "props": true},
+            { "name":"Year-Archive-Paged", "path": "/:year/page/:paged_index/", "component": "ArchiveDate", "props": true},
+            { "name":"Year-Archive", "path": "/:year/", "component": "ArchiveDate", "props": true},
+            { "name":"Month-Archive-Paged", "path": "/:year/:month/page/:paged_index/", "component": "ArchiveDate", "props": true},
+            { "name":"Month-Archive", "path": "/:year/:month/", "component": "ArchiveDate", "props": true},
+            { "name":"Date-Archive-Paged", "path": "/:year/:month/:day/page/:paged_index/", "component": "ArchiveDate", "props": true},
+            { "name":"Date-Archive", "path": "/:year/:month/:day/", "component": "ArchiveDate", "props": true}
+            ]');
 
         $component_templates[] = "Search";
         $component_templates[] = "Author";

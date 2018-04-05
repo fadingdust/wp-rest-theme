@@ -62,6 +62,8 @@ section {
 	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
 
+ul.list-inline li{display:inline-block;margin-left: 8px;}
+
 /* Bootstrap: */
 .site-header .navbar-brand{
   margin: 0;
@@ -121,6 +123,11 @@ ul.dropdown-menu.show{
 .alignright{float:right;margin: 2px 0 8px 8px;}
 .alignleft{float:left;margin: 2px 8px 8px 0;}
 .wp-caption-text{margin-top:0;}
+
+.pagination p{display:inline-block;padding: 5px;}
+.posts-pagination li a{display:inline-block;padding: 5px;min-width:40px;text-align:center;}
+.posts-pagination li:hover{background-color:#f9f9f9;}
+.posts-pagination li.active{background-color:#fff};
 
 .entry-title {
 	font-size: 30px;

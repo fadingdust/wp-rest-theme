@@ -9,29 +9,56 @@
         <h1 class="page-title" v-if="(term)">{{ term.name }}</h1>
 
         <div class="posts-wrapper">
+            <loading v-if="(loading)"></loading>
+            <not-found v-if="(!loading && posts.length == 0)"></not-found>
+
             <Post v-for="post in posts" :post="post" :key="post.id" v-if="post"></Post>
         </div>
+
+        <div class="pagination" v-if="(!loading && post_count > 0)">
+          <p>Posts: {{ post_count }}</p>
+          <p v-if="( page_count == 1)">All Posts Shown.</p>
+          <ul v-if="( page_count > 1 && pagination_component_name)" class="posts-pagination list-inline">
+            <li :class="[{ active: (paged_index == page_index) }]"   v-for="page_index in page_count" :key="page_index"><router-link :to="{ name: pagination_component_name, params: { term_slug: term.slug, paged_index: page_index }}">{{ page_index }}</router-link></li>
+          </ul>
+        </div>
+
     </main>
 
 </div>
 </template>
 
 <script>
+    import Config from '../app.config.js'
     import WordpressService from '../services/wordpress';
+
+    import NotFound from '../components/not-found.vue';
+    import Loading from '../components/loading.vue';
 
     export default {
         props: ['term_slug', 'taxonomy_name', 'post_types'],
+
+        components: {
+          NotFound, Loading
+        },
 
         data() {
             return {
                 loading: true,
                 error: false,
                 term: {},
-                posts: []
+                posts: [],
+                post_count: 0,
+                page_count: 1,
+                paged_index: 1,
+                pagination_component_name:'Blog'
             }
         },
 
-        mounted() {
+        created() {
+            this.paged_index = (this.$route.params && this.$route.params.paged_index) ? this.$route.params.paged_index : 1;
+            this.pagination_component_name = (this.$route.name) ? this.$route.name : "Blog";
+            if( this.pagination_component_name.indexOf("-Paged") < 0) this.pagination_component_name=this.pagination_component_name+"-Paged"; //the pagination component will always be paged!
 
             if(this.post_types.length==1 && typeof this.taxonomy_name == 'undefined'){
               this.getPostsByTerm('', '');  // URI: /custom-post-type/
@@ -67,23 +94,29 @@
             }, // getTermInfo
 
             getPostsByTerm: function(taxonomy_name, term_id) {
+                this.loading = true;
                 let post_type_index = 0;
                 for(post_type_index in this.post_types){
 
-                    const wpPromisedResult = WordpressService.getTermPosts( this.post_types[post_type_index], taxonomy_name, term_id);
+                    const wpPromisedResult = WordpressService.getTermPosts( this.post_types[post_type_index], taxonomy_name, term_id, this.paged_index, Config.posts_per_page);
                     wpPromisedResult.then(result => {
-                          this.loading = false;
+                        this.post_count = result.totalPosts;
+                        this.page_count = Math.ceil( this.post_count / Config.posts_per_page);
 
-                          if( result.posts.length == 0 ) this.error = true;
+                        this.loading = false;
 
-                          let middle_man = this.posts;
-                          this.posts = middle_man.concat(result.posts);  //concat directly on posts does not update: https://vuejs.org/v2/guide/list.html#Caveats
+                        if( result.posts.length == 0 ) this.error = true;
 
-                      })
-                      .catch(err => {
-                        this.error = true;
-                        console.log("getPostsByTerm Error!", err, wpPromisedResult);
-                      });
+                        let middle_man = this.posts;
+                        this.posts = middle_man.concat(result.posts);  //concat directly on posts does not update: https://vuejs.org/v2/guide/list.html#Caveats
+
+                        console.log("getPostsByTerm Result:", result);
+
+                    })
+                    .catch(err => {
+                      this.error = true;
+                      console.log("getPostsByTerm Error!", err, wpPromisedResult);
+                    });
 
                 }//for
 

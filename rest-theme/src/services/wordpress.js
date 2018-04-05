@@ -13,7 +13,7 @@ let wordpressService = {
           .then(response => {
               if( typeof response.data !== 'object') reject( response );
 
-              let responseData = {posts: response.data, totalPages: 1};
+              let responseData = {posts: response.data,  totalPosts: parseInt(response.headers.map['x-wp-total'][0]),  totalPages: parseInt(response.headers.map['x-wp-totalpages'][0])  };
               resolve( responseData );
 
           })
@@ -34,43 +34,49 @@ let wordpressService = {
     })
   },
 
-  getPosts: function() {
-    let path = Config.root + "wp-json/wp/v2/post";
+  getPosts: function(pageIndex, perPage) {
+    let path = Config.root + "wp-json/wp/v2/post?page="+Math.max(1,parseInt(pageIndex))+"&per_page="+Math.max(1,parseInt(perPage));
     return new Promise((resolve, reject) => {
         this.getFromAPI( path, resolve, reject );
     })
   },
 
-  getAuthorPosts: function( author_id) {
-    let path = Config.root + "wp-json/wp/v2/post?author="+author_id;
+  getAuthorPosts: function( author_id, pageIndex, perPage) {
+    let path = Config.root + "wp-json/wp/v2/post?author="+author_id+"&page="+Math.max(1,parseInt(pageIndex))+"&per_page="+Math.max(1,parseInt(perPage));
     return new Promise((resolve, reject) => {
         this.getFromAPI( path, resolve, reject );
     })
   },
 
-  getMonthPosts: function(year, month, page, perPage, order = 'desc') {    // "yyyy-mm-dd 00:00:00"
+  getMonthPosts: function(year, month, pageIndex, perPage, order = 'desc') {    // "yyyy-mm-dd 00:00:00"
 
     //TODO: Check if month > -1, < 13
-    let thisMonthDate=year+"-"+month+'-01 00:00:00';
-    let nextMonthDate=year+"-"+month+'-31 00:00:00'; //yes. works for Feb!
+    let month1=month;
+    let month2=month;
+    if(!month){
+      month1="01";
+      month2=12;
+    }
+    let thisMonthDate=year+"-"+month1+'-01 00:00:00';
+    let nextMonthDate=year+"-"+month2+'-31 00:00:00'; //yes. works for Feb!
 
     let subQuery = "after="+thisMonthDate+"&before="+nextMonthDate;
-    let path = Config.root + `wp-json/wp/v2/post?${subQuery}&page=${page}&order=${order}&per_page=${perPage}`;
+    let path = Config.root + "wp-json/wp/v2/post?"+subQuery+"&page="+Math.max(1,parseInt(pageIndex))+"&per_page="+Math.max(1,parseInt(perPage))+"&order="+order;
 
     return new Promise((resolve, reject) => {
         this.getFromAPI( path, resolve, reject );
     })
   },
 
-  getTermPosts: function( post_type, taxonomy_name, term_id ) {
-    let path = Config.root + "wp-json/wp/v2/"+post_type+"?"+taxonomy_name+"="+term_id;
+  getTermPosts: function( post_type, taxonomy_name, term_id, pageIndex , perPage ) {
+    let path = Config.root + "wp-json/wp/v2/"+post_type+"?"+taxonomy_name+"="+term_id+"&page="+Math.max(1,parseInt(pageIndex))+"&per_page="+Math.max(1,parseInt(perPage));
     return new Promise((resolve, reject) => {
         this.getFromAPI( path, resolve, reject );
     })
   },
 
-  getSearchPosts: function( term_slug ) {
-    let path = Config.root + "wp-json/wp/v2/post/?search="+term_slug;
+  getSearchPosts: function( term_slug, pageIndex , perPage) {
+    let path = Config.root + "wp-json/wp/v2/post/?search="+term_slug+"&page="+Math.max(1,parseInt(pageIndex))+"&per_page="+Math.max(1,parseInt(perPage));
     return new Promise((resolve, reject) => {
         this.getFromAPI( path, resolve, reject );
     })
