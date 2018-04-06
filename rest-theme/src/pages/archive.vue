@@ -7,12 +7,13 @@
 
     <main class="content">
         <h1 class="page-title" v-if="(term)">{{ term.name }}</h1>
+        <p class="archive-description" v-if="(term)">{{ term.description }}</p>
 
         <div class="posts-wrapper">
             <loading v-if="(loading)"></loading>
             <not-found v-if="(!loading && posts.length == 0)"></not-found>
 
-            <Post v-for="post in posts" :post="post" :key="post.id" v-if="post"></Post>
+            <Post v-for="post in posts" :post="post" :key="post.id" v-if="posts"></Post>
         </div>
 
         <div class="pagination" v-if="(!loading && post_count > 0)">
@@ -51,13 +52,13 @@
                 post_count: 0,
                 page_count: 1,
                 paged_index: 1,
-                pagination_component_name:'Blog'
+                pagination_component_name:'Taxonomy-Category-Archive-Paged'
             }
         },
 
         created() {
             this.paged_index = (this.$route.params && this.$route.params.paged_index) ? this.$route.params.paged_index : 1;
-            this.pagination_component_name = (this.$route.name) ? this.$route.name : "Blog";
+            this.pagination_component_name = (this.$route.name) ? this.$route.name : "Taxonomy-Category-Archive-Paged";
             if( this.pagination_component_name.indexOf("-Paged") < 0) this.pagination_component_name=this.pagination_component_name+"-Paged"; //the pagination component will always be paged!
 
             if(this.post_types.length==1 && typeof this.taxonomy_name == 'undefined'){
