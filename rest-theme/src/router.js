@@ -1,7 +1,10 @@
 import Vue from 'vue/dist/vue.js'
-import VueRouter from 'vue-router'
 
-Vue.use(require('vue-resource'));
+//Vue.use(require('vue-resource'));
+import VueResource from 'vue-resource';
+Vue.use(VueResource);
+
+import VueRouter from 'vue-router'
 Vue.use(VueRouter);
 
 Vue.config.debug = true

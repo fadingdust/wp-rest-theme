@@ -2,7 +2,11 @@
  *
  * Source: https://github.com/bstavroulakis/vue-wordpress-pwa/blob/master/src/app.config.js
  */
+
 import Vue from 'vue/dist/vue.js'
+//import Vue from 'vue'
+//var Vue = require('vue')
+//import Vue from 'vue'
 import Config from '../app.config.js'
 
 let wordpressService = {

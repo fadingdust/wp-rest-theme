@@ -1,5 +1,8 @@
 import Vue from 'vue/dist/vue.js'
 
+import VueResource from 'vue-resource';
+Vue.use(VueResource);
+
 import router from './router.js'
 
 import Footer from './components/theme-footer.vue';
@@ -38,6 +41,7 @@ new Vue({
         }
     }
 });
+
 
 
 ///////////////////////////////////////////////////////////////////////
