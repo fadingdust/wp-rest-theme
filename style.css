@@ -127,7 +127,8 @@ ul.dropdown-menu.show{
 .pagination p{display:inline-block;padding: 5px;}
 .posts-pagination li a{display:inline-block;padding: 5px;min-width:40px;text-align:center;}
 .posts-pagination li:hover{background-color:#f9f9f9;}
-.posts-pagination li.active{background-color:#fff};
+.posts-pagination li a.router-link-active,
+.posts-pagination li.active a{background-color:#fff};
 
 .entry-title {
 	font-size: 30px;
@@ -170,3 +171,64 @@ ul.dropdown-menu.show{
 	99% { opacity: 0; transform: translateY(-30px);}
 	100% { opacity: 0;z-index:-1 }
 }
+
+
+/* Enter and leave animations can use different */
+/* durations and timing functions.              * /
+.post-list{transition: opacity 1s ease;}*/
+.slide-fade-enter-active {
+  transition: opacity .2s ease-in;
+}
+.slide-fade-leave-active {
+  transition: opacity .4s ease-out;
+}
+.slide-fade-enter{
+/*  transform: translateY(10px); */
+  opacity: 0;
+}
+.slide-fade-leave-to {
+/*  transform: translateY(10px); */
+  opacity: 0;
+}
+
+
+.parent-fade-enter {
+  opacity: 0;
+}
+
+.parent-fade-enter-active {
+  transition: opacity .6s ease-in;
+}
+
+.parent-fade-leave {}
+
+.parent-fade-leave-active {
+  transition: all .4s ease-out;
+  opacity: 0;
+}
+
+.fade-enter {
+  opacity: 0;
+}
+
+.fade-enter-active {
+  transition: opacity .6s ease-in;
+}
+
+.fade-leave {}
+
+.fade-leave-active {
+  transition: all .4s ease-out;
+  opacity: 0;
+  position:absolute;top:0;
+}
+
+
+.posts-wrapper{
+  min-height: 20vh;
+  transition: .2s min-height;
+  position: relative;
+  overflow:hidden;
+}
+
+

@@ -8,18 +8,22 @@
     <main class="content">
         <h1 class="page-title" v-if="(this.year)">Posts from {{monthTitle}} </h1>
 
-        <div class="posts" v-if="(posts)">
+        <div class="posts-wrapper">
             <loading v-if="(loading)"></loading>
             <not-found v-if="(!loading && posts.length == 0)"></not-found>
 
-            <Post v-for="post in posts" :post="post" :key="post.id"></Post>
+            <transition name="fade" appear>
+              <router-view name="post-list" :posts="posts" :key="this.$route.fullPath"></router-view>
+            </transition>
         </div>
 
         <div class="pagination" v-if="(!loading && post_count > 0)">
           <p>Posts: {{ post_count }}</p>
           <p v-if="( page_count == 1)">All Posts Shown.</p>
           <ul v-if="( page_count  > 1)" class="posts-pagination list-inline">
-            <li :class="[{ active: (paged_index == page_index) }]"   v-for="page_index in page_count" :key="page_index"><router-link :to="{ name: pagination_component_name, params: { paged_index: page_index, 'year': year, 'month': month }}">{{ page_index }}</router-link></li>
+            <li :class="[{ active: (params.paged_index == page_index) }]"  v-for="page_index in page_count" :key="page_index">
+              <router-link :to="{ name: pagination_component_name, params: { paged_index: page_index, 'year': year, 'month': month }}">{{ page_index }}</router-link>
+            </li>
           </ul>
         </div>
 
@@ -33,15 +37,15 @@
     import WordpressService from '../services/wordpress';
     import moment from "moment";
 
-
     import NotFound from '../components/not-found.vue';
     import Loading from '../components/loading.vue';
+    import PostList from '../components/post-list.vue';
 
     export default {
         props: ['year','month'],
 
         components: {
-          NotFound, Loading
+          NotFound, Loading, PostList
         },
 
         computed:{
@@ -61,23 +65,40 @@
                 posts: [],
                 post_count: 0,
                 page_count: 1,
-                paged_index: 1,
-                pagination_component_name: 'Month-Archive-Paged'
+                pagination_component_name: 'Month-Archive-Paged',
+                params: { paged_index: 1 }  //handy place to merge props & params
             }
         },
 
-        mounted() {
-            this.paged_index = (this.$route.params && this.$route.params.paged_index) ? this.$route.params.paged_index : 1;
+
+        beforeRouteUpdate (to, from, next) {  // Option A: App-Level component gets fully-replaced; Option B: here: manually swap data.
+          // react to route changes.. (for subcomponents/router-view)
+          console.log("archive before update:", to, from, this);
+          this.loading = true;
+          this.posts= []; //clear for now
+
+          this.params = { ...to.params, ...this.$props };
+
+          this.getPosts(); //implicit page_id
+
+          next(); // don't forget to call next()
+        },
+
+        created() {
+            this.params = { ...this.params, ...this.$route.params, ...this.$props };
 
             this.pagination_component_name = (this.$route.name) ? this.$route.name : "Month-Archive-Paged";
+            this.pagination_component_name = this.pagination_component_name.replace("-UnPaged","");
             if( this.pagination_component_name.indexOf("-Paged") < 0) this.pagination_component_name=this.pagination_component_name+"-Paged"; //the pagination component will always be paged!
+
+console.log("ArchiveDate: Creating Pagination Component Name: ", this.pagination_component_name);
 
             this.getPosts();
         },
 
         methods: {
             getPosts: function() {
-                const wpPromisedResult = WordpressService.getMonthPosts( this.year, this.month, this.paged_index, Config.posts_per_page, this.order );
+                const wpPromisedResult = WordpressService.getMonthPosts( this.params.year, this.params.month, this.params.paged_index, Config.posts_per_page, this.order );
                 wpPromisedResult.then(result => {
                       console.log("PostSlug Found!", result.posts, result.totalPages);
                       this.loading = false;

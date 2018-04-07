@@ -12,9 +12,9 @@ Vue.component('theme-footer', Footer);
 new Vue({
     el: '#app',
     router: router,
-
+// :key="this.$route.fullPath"
     template: '<div id="app-root">' +
-              '<div class="container"><router-view :key="this.$route.fullPath"></router-view></div>' +
+              '<div class="container"><transition name="parent-fade" mode="out-in" appear><router-view :key="unpagedPath"></router-view></transition></div>' +
               '<theme-footer></theme-footer></div>',
 
     mounted() {
@@ -24,7 +24,21 @@ new Vue({
     methods: {
         updateTitle(pageTitle) {
             document.title = (pageTitle ? pageTitle + ' - ' : '') + wp.site_name;
+        },
+
+    },
+
+    computed: {
+
+        unpagedPath: function(){  //Vue-Router tends to prefer non-trailing slashes..
+          let path = this.$route.fullPath;
+          if( path.substring(path.length -1, path.length) == '/') path = path.substring(0, path.length-1) //trim trailing slash
+          let pagedIndex = path.indexOf('/page/');
+          if(pagedIndex > 1 ) path = path.substring(0, pagedIndex);
+          console.log("unpagedPath: ", pagedIndex, path  )
+          return path;
         }
+
     },
 
     updated: function(){
@@ -47,6 +61,7 @@ new Vue({
 ///////////////////////////////////////////////////////////////////////
 //  Fix the static nav <a> links to be <router-link>.
 ///////////////////////////////////////////////////////////////////////
+
 jQuery( "a[href^='"+wp.base_path+"'], a[href^='/']:not([href*='#'])"  ).on("click", function(event){
     event.preventDefault();
 
@@ -62,5 +77,6 @@ jQuery( "a[href^='"+wp.base_path+"'], a[href^='/']:not([href*='#'])"  ).on("clic
     jQuery(this).parent("li").addClass('current-menu-item');
 
 }); // click
+
 
 

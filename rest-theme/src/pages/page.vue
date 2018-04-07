@@ -1,5 +1,5 @@
 <style>
-
+.content{min-height: 20vh;}
 </style>
 
 <template>

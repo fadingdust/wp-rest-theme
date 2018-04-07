@@ -31,6 +31,8 @@ Vue.component('Post', Post);
 import Page from './pages/page.vue';
 Vue.component('Page', Page);
 
+import PostList from './components/post-list.vue';
+Vue.component('PostList', PostList);
 
 var router = new VueRouter({
   mode: 'history',
@@ -51,6 +53,18 @@ for (var key in wp.routes) {
     let component_name = route.component;
     wp.routes[key].component = Vue.component( component_name );
 
+console.log("Adding Route:", wp.routes[key]);
+
+    if( wp.routes[key].children && wp.routes[key].children.length > 0){
+      for (var child_key in wp.routes[key].children) {
+        let child_component_name = wp.routes[key].children[child_key].component;
+        wp.routes[key].children[child_key].component = null;
+        wp.routes[key].children[child_key].components = { "post-list": Vue.component( child_component_name ) };
+
+console.log("Adding Route: Child:", wp.routes[key].children[child_key], child_component_name);
+
+      }
+    }
     if( typeof(wp.routes[key].component) == "undefined" ) console.log("Developer: Please create component named " + component_name );
 }
 router.addRoutes( wp.routes );
