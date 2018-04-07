@@ -22,7 +22,7 @@
           <p v-if="( page_count == 1)">All Posts Shown.</p>
           <ul v-if="( page_count  > 1)" class="posts-pagination list-inline">
             <li :class="[{ active: (params.paged_index == page_index) }]"  v-for="page_index in page_count" :key="page_index">
-              <router-link :to="{ name: 'Blog-Paged', params: { 'paged_index': page_index }}">{{ page_index }}</router-link>
+              <router-link :to="{ name: pagination_component_name, params: { 'paged_index': page_index }}">{{ page_index }}</router-link>
             </li>
           </ul>
         </div>
@@ -52,6 +52,7 @@
                 posts: [],
                 post_count: 0,
                 page_count: 1,
+                pagination_component_name: 'Blog-Paged',  //or Home-Paged
                 params: { paged_index: 1 }  //handy place to merge props & params
             }
         },
@@ -72,6 +73,11 @@
 
         created() {
             this.params = { ...this.params, ...this.$route.params };
+
+            this.pagination_component_name = (this.$route.name) ? this.$route.name : "Blog-Paged";
+              this.pagination_component_name=this.pagination_component_name.replace("-UnPaged","");
+              if( this.pagination_component_name.indexOf("-Paged") < 0) this.pagination_component_name=this.pagination_component_name+"-Paged"; //the pagination component will always be paged!
+console.log("PCN: ", this.pagination_component_name);
 
             this.getPosts();
         },

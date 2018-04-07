@@ -76,13 +76,54 @@ class WP_Vue_Router_Context{
         $pages = get_pages();
         $domain = get_option('home');
 
+
+        if( $frontpage_id == $blog_home_id && $frontpage_id == "0"){  // neither are defined: show posts on home
+                $thisRoute=new stdClass();
+                $thisRoute->name = 'Home';
+                  $thisRoute->path = "/";
+                  $thisRoute->component = "Blog";
+
+                    // UNPAGED BLOG-HOME:
+                    $thisChildRoute=new stdClass();
+                    $thisChildRoute->name = 'Home-UnPaged';
+                    $thisChildRoute->path = ""; // rewrite['slug']
+                    $thisChildRoute->component="PostList"; //$this->template_name_cleanup($component_name);
+                      //Add in extra meta
+                    $thisChildRoute->props = new stdClass();
+                    $thisChildRoute->props->default = true;
+                    $thisChildRoute->props->post_type = 'post';  // BUG: ???
+                    $thisChildRoute->props->post_types = 'post'; //$taxonomy->object_type;
+                      //Export
+                    $thisRoute->children=array( $thisChildRoute );
+                    $thisChildRoute=null;
+
+                    // PAGED BLOG-HOME:
+                    $thisChildRoute=new stdClass();
+                    $thisChildRoute->name = 'Home-Paged';
+                    $thisChildRoute->path = "page/:paged_index([\d]*)/"; // rewrite['slug']
+                    $thisChildRoute->component="PostList"; //$this->template_name_cleanup($component_name);
+                      //Add in extra meta
+                    $thisChildRoute->props = new stdClass();
+                    $thisChildRoute->props->default = true;
+                    $thisChildRoute->props->post_type = 'post';  // BUG: ???
+                    $thisChildRoute->props->post_types = 'post'; //$taxonomy->object_type;
+                      //Export
+                    $thisRoute->children[] = $thisChildRoute ;
+                    $thisChildRoute=null;
+
+                  //Export
+                $routes[] = $thisRoute;
+                $component_templates[] = $thisRoute->component;
+                $thisRoute=null;
+        }
+
         foreach ( $pages as $page ) {
             // Routes[] = { path: '/gallery/', component: Archive}
             $full_path=str_replace( array($domain, 'https://', 'http://', $_SERVER['HTTP_HOST']), '', get_the_permalink($page->ID) ); //Pare off what the registered wp domain, but also any other domain this might be run on
             $page_template_slug = str_replace(".php", "", get_page_template_slug( $page->ID ) );
             if($page_template_slug) $component_name = basename($page_template_slug);
 
-            if( $page->ID == $blog_home_id){
+            if( $page->ID == $blog_home_id ){
                 $thisRoute=new stdClass();
                 $thisRoute->name = 'Blog';
                   $thisRoute->path = $full_path;
@@ -122,12 +163,11 @@ class WP_Vue_Router_Context{
                 $thisRoute=null;
 
 
-
             } else if( $page->ID == $frontpage_id){
                 $thisRoute=new stdClass();
-                  $thisRoute->path = $full_path;
+                  $thisRoute->path = "/";// $full_path;
                   $thisRoute->name = 'Home';
-                  $thisRoute->component = "Home";
+                  $thisRoute->component = "FrontPage";
                   $thisRoute->params = array("post_slug"=>$page->post_name);
                   //Add in extra meta, since '/' is a terrible slug (and inaccurate)
                   $thisRoute->props = new stdClass();

@@ -34,7 +34,7 @@ new Vue({
           let path = this.$route.fullPath;
           if( path.substring(path.length -1, path.length) == '/') path = path.substring(0, path.length-1) //trim trailing slash
           let pagedIndex = path.indexOf('/page/');
-          if(pagedIndex > 1 ) path = path.substring(0, pagedIndex);
+          if(pagedIndex > -1 ) path = path.substring(0, pagedIndex);  // blog-home = '/'
           console.log("unpagedPath: ", pagedIndex, path  )
           return path;
         }
