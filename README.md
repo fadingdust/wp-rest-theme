@@ -17,11 +17,11 @@ This project has multiple branches. Each branch adds a feature overtop the prior
 
 ### Usage
 
-To use the theme on your WordPress site just install it like any other theme, but you'll likely need to compile the dist/build.js file.
+To use the theme on your WordPress site just install it like any other theme, but you'll likely need to compile the dist/main.min.js file.
 
 ### Customization
 
-All of the Vue.js specific code is in the `rest-theme/src` folder. To build the `dist/build.js` script while
+All of the Vue.js specific code is in the `rest-theme/src` folder. To build the `dist/main.min.js` script while
 developing run the following from the theme root:
 
 ```

@@ -8,7 +8,10 @@
 </template>
 
 <script>
-
+/**
+ * Entirely plausible to have this do the pagination.
+ *
+ */
 import PostExcerpt from '../components/post-excerpt.vue';
 
 export default {
@@ -16,7 +19,8 @@ export default {
       PostExcerpt
     },
     props: [
-      'posts', 'isSingle'
+      'posts',
+      'isSingle'  //prime candidate to be moved into a state store like VueX
     ],
     data() {
         return {
