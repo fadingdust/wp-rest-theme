@@ -134,6 +134,8 @@ module.exports = {
   devtool: '#eval-source-map'
 }
 
+// Debug sizes:  https://chrisbateman.github.io/webpack-visualizer/
+
 if (process.env.NODE_ENV === 'production') {
   module.exports.devtool = '#source-map'
   // http://vue-loader.vuejs.org/en/workflow/production.html
@@ -143,6 +145,10 @@ if (process.env.NODE_ENV === 'production') {
         NODE_ENV: '"production"'
       }
     }),
+    new webpack.ContextReplacementPlugin( // Drops Moment.js by 200k:
+      /moment[\/\\]locale$/,
+      /en|de|fr|es|pl|ua|ru/
+    ),
     new webpack.optimize.UglifyJsPlugin({
       sourceMap: true,
       compress: {
