@@ -2,7 +2,7 @@
 
 const Config = {
   root: wp.base_url+'/',
-  posts_per_page: 3
+  posts_per_page: wp.posts_per_page, // from localize /wp
 //  client: 'http://local.vuewp.com/',
 //  loadDbName: 'vwpLocal',
 //  analyticsPath: '//www.google-analytics.com/analytics.js'

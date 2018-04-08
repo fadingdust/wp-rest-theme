@@ -18,6 +18,7 @@ function rest_theme_scripts() {
 		'base_path' => $base_path ? $base_path . '/' : '/',
 		'nonce'     => wp_create_nonce( 'wp_rest' ),
 		'site_name' => get_bloginfo( 'name' ),
+		'posts_per_page' => get_option("posts_per_page"),
 		'components'=> $wp_vue->get_components(),
 		'routes'    => $wp_vue->get_routes(),
 	) );
