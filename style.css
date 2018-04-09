@@ -138,6 +138,12 @@ ul.dropdown-menu.show{
 
 /* Basic App styling */
 
+.posts-wrapper{
+  min-height: 40vh;
+  position: relative;
+  overflow:hidden;
+}
+
 .notifications{
   height: 30px;
   position: relative;
@@ -173,24 +179,7 @@ ul.dropdown-menu.show{
 }
 
 
-/* Enter and leave animations can use different */
-/* durations and timing functions.              * /
-.post-list{transition: opacity 1s ease;}*/
-.slide-fade-enter-active {
-  transition: opacity .2s ease-in;
-}
-.slide-fade-leave-active {
-  transition: opacity .4s ease-out;
-}
-.slide-fade-enter{
-/*  transform: translateY(10px); */
-  opacity: 0;
-}
-.slide-fade-leave-to {
-/*  transform: translateY(10px); */
-  opacity: 0;
-}
-
+/** Parent-Route Transitions **/
 
 .parent-fade-enter {
   opacity: 0;
@@ -206,29 +195,51 @@ ul.dropdown-menu.show{
   transition: all .4s ease-out;
   opacity: 0;
 }
+/** Child-Route Transitions **/
 
 .fade-enter {
   opacity: 0;
 }
 
 .fade-enter-active {
-  transition: opacity .6s ease-in;
+  transition: opacity .4s ease-in;
 }
 
 .fade-leave {}
 
 .fade-leave-active {
-  transition: all .4s ease-out;
+  transition: all .3s ease-out;
   opacity: 0;
   position:absolute;top:0;
 }
 
-
+/** Child-Route Transitions: Posts **/
 .posts-wrapper{
-  min-height: 40vh;
-  transition: .2s min-height;
-  position: relative;
+  width:100%;
   overflow:hidden;
+  position: relative;
+  min-height: 60vh;
 }
+.posts-wrapper:after{
+  transition: transform .45s ease;
+  content:'';
+  display:block;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top:0;
+  left:0;
+  box-shadow: 0 -20px 20px rgba(237,238,238,.9);/* debatably useful */
+  background: #eee;
 
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#eeeeee+0,ffffff+100
+  background: linear-gradient(to bottom, rgba(238,238,238,1) 0%,rgba(255,255,255,1) 100%);
+  */
 
+}
+.posts-wrapper.content-loading:after{
+  transform:translateY(0%);
+}
+.posts-wrapper.content-loaded:after{
+  transform:translateY( 101%);
+}

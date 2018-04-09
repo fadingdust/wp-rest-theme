@@ -8,7 +8,7 @@
     <main class="content">
         <h1 class="page-title" v-if="(params.term_slug)">Search Results for &ldquo;{{ params.term_slug }}&rdquo;</h1>
 
-        <div class="posts-wrapper search-archive">
+        <div :class="['posts-wrapper", "search-archive', {'content-loading': loading, 'content-loaded':(!loading) } ]">
             <loading v-if="(loading)"></loading>
             <not-found v-if="(!loading && posts.length == 0)"></not-found>
 
@@ -66,7 +66,6 @@
 
         beforeRouteUpdate (to, from, next) {
           // react to route changes.. (for subcomponents/router-view)
-          console.log("archive before update:", to, from, this);
           this.loading = true;
           this.posts= []; //clear for now
 
@@ -78,7 +77,7 @@
         },
 
         created() {
-            this.params = { ...this.params, ...this.$route.params, ...this.$props };
+            this.params = { ...this.params, ...this.$props, ...this.$route.params }; // right-most wins
 
             this.getPosts( this.params.term_slug);
         },

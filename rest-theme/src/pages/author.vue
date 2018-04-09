@@ -9,7 +9,7 @@
         <h1 class="page-title" v-if="(author)">Posts by {{ author.name }}</h1>
         <p class="archive-description" v-if="(author)">{{ author.description }}</p>
 
-        <div class="posts-wrapper author-archive">
+        <div :class="['posts-wrapper', 'author-archive', {'content-loading': loading, 'content-loaded':(!loading) } ]">
             <loading v-if="(loading)"></loading>
             <not-found v-if="(!loading && posts.length == 0)"></not-found>
 
@@ -63,7 +63,6 @@
 
         beforeRouteUpdate (to, from, next) {  // Option A: App-Level component gets fully-replaced; Option B: here: manually swap data.
           // react to route changes.. (for subcomponents/router-view)
-          console.log("archive before update:", to, from, this);
           this.loading = true;
           this.posts= []; //clear for now
 
@@ -75,7 +74,7 @@
         },
 
         created() {
-            this.params = { ...this.params, ...this.$route.params, ...this.$props };
+            this.params = { ...this.params, ...this.$props, ...this.$route.params }; // right-most wins
 
             this.getAuthor( this.params.author_slug );
         },

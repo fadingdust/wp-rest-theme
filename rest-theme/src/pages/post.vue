@@ -18,7 +18,7 @@ article img{
 <div class="page-wrapper">
     <main class="content">
 
-        <div class="posts-wrapper">
+        <div :class="['posts-wrapper', {'content-loading': loading, 'content-loaded':(!loading) } ]">
             <loading v-if="(loading)"></loading>
             <not-found v-if="(!loading && posts.length == 0)"></not-found>
 

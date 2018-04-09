@@ -8,7 +8,7 @@
     <main class="content">
         <h1 class="page-title" v-if="(this.year)">Posts from {{monthTitle}} </h1>
 
-        <div class="posts-wrapper">
+        <div :class="['posts-wrapper', {'content-loading': loading, 'content-loaded':(!loading) } ]">
             <loading v-if="(loading)"></loading>
             <not-found v-if="(!loading && posts.length == 0)"></not-found>
 
@@ -73,7 +73,6 @@
 
         beforeRouteUpdate (to, from, next) {  // Option A: App-Level component gets fully-replaced; Option B: here: manually swap data.
           // react to route changes.. (for subcomponents/router-view)
-          console.log("archive before update:", to, from, this);
           this.loading = true;
           this.posts= []; //clear for now
 
@@ -85,7 +84,7 @@
         },
 
         created() {
-            this.params = { ...this.params, ...this.$route.params, ...this.$props };
+            this.params = { ...this.params, ...this.$props, ...this.$route.params }; // right-most wins
 
             this.pagination_component_name = (this.$route.name) ? this.$route.name : "Month-Archive-Paged";
             this.pagination_component_name = this.pagination_component_name.replace("-UnPaged","");

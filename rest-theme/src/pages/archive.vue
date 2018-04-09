@@ -9,7 +9,7 @@
         <h1 class="page-title" v-if="(term)">{{ term.name }}</h1>
         <p class="archive-description" v-if="(term)">{{ term.description }}</p>
 
-        <div class="posts-wrapper">
+        <div :class="['posts-wrapper', {'content-loading': loading, 'content-loaded':(!loading) } ]">
             <loading v-if="(loading)"></loading>
             <not-found v-if="(!loading && posts.length == 0)"></not-found>
 
@@ -63,10 +63,9 @@
 
         beforeRouteUpdate (to, from, next) {  // Option A: App-Level component gets fully-replaced; Option B: here: manually swap data.
           // react to route changes.. (for subcomponents/router-view)
-          console.log("archive before update:", to, from, this);
           this.loading = true;
 
-          this.params = { ...to.params, ...this.$props };
+          this.params = { ...this.$props, ...to.params };
 
           this.getPostsByTerm(this.taxonomy_name, this.term.id , to.params.paged_index); //implicit page_id
 
@@ -74,7 +73,7 @@
         },
 
         created() {
-            this.params = { ...this.params, ...this.$route.params, ...this.$props };
+            this.params = { ...this.params, ...this.$props, ...this.$route.params }; // right-most wins
 
             this.pagination_component_name = (this.$route.name) ? this.$route.name : "Taxonomy-Category-Archive-Paged";
               this.pagination_component_name=this.pagination_component_name.replace("-UnPaged","");
@@ -85,10 +84,9 @@
               this.getPostsByTerm('', '', this.params.paged_index);  // URI: /custom-post-type/
 
             }else{  // URI: /taxonomy-name/term-name/
-              this.params.term_slug = this.term_slug;
-              if(!this.params.term_slug && this.$route.params.term_slug) this.params.term_slug = this.$route.params.term_slug;  // sometimes the prop isn't set on path-routes
 
-              if(this.params.term_slug && this.post_types) this.getTermInfo(this.taxonomy_name, this.params.term_slug);
+              if( typeof this.params.term_slug !== "undefined" && this.post_types) this.getTermInfo(this.taxonomy_name, this.params.term_slug);
+              else console.log( "Term Slug is undefined, no content will be loaded: ", this.params, this.$route.params, this.$props );
 
             }
 
