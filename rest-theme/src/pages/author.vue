@@ -11,7 +11,7 @@
 
         <div :class="['posts-wrapper', 'author-archive', {'content-loading': loading, 'content-loaded':(!loading) } ]">
             <loading v-if="(loading)"></loading>
-            <not-found v-if="(!loading && posts.length == 0)"></not-found>
+            <not-found v-if="(!loading && posts.length == 0)" :slug="author_slug"></not-found>
 
             <transition name="fade" appear>
               <router-view name="post-list" :posts="posts" :key="this.$route.fullPath"></router-view>
@@ -35,6 +35,7 @@
 
 <script>
     import Config from '../app.config.js'
+    import Mixin from '../globals.js';
     import WordpressService from '../services/wordpress';
 
     import NotFound from '../components/not-found.vue';
@@ -42,6 +43,8 @@
     import PostList from '../components/post-list.vue';
 
     export default {
+        mixins: [Mixin],
+
         props: ['author_slug'],
 
         components: {
@@ -77,6 +80,9 @@
             this.params = { ...this.params, ...this.$props, ...this.$route.params }; // right-most wins
 
             this.getAuthor( this.params.author_slug );
+
+            this.updateHTMLTitle("Archive: "+this.author_slug); //TODO: Use actual author name
+
         },
 
         methods: {

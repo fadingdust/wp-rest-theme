@@ -10,7 +10,7 @@
 
         <div :class="['posts-wrapper', {'content-loading': loading, 'content-loaded':(!loading) } ]">
             <loading v-if="(loading)"></loading>
-            <not-found v-if="(!loading && posts.length == 0)"></not-found>
+            <not-found v-if="(!loading && posts.length == 0)" :slug="monthTitle"></not-found>
 
             <transition name="fade" appear>
               <router-view name="post-list" :posts="posts" :key="this.$route.fullPath"></router-view>
@@ -34,6 +34,7 @@
 
 <script>
     import Config from '../app.config.js'
+    import Mixin from '../globals.js';
     import WordpressService from '../services/wordpress';
     import moment from "moment";
 
@@ -42,6 +43,8 @@
     import PostList from '../components/post-list.vue';
 
     export default {
+        mixins: [Mixin],
+
         props: ['year','month'],
 
         components: {
@@ -90,9 +93,11 @@
             this.pagination_component_name = this.pagination_component_name.replace("-UnPaged","");
             if( this.pagination_component_name.indexOf("-Paged") < 0) this.pagination_component_name=this.pagination_component_name+"-Paged"; //the pagination component will always be paged!
 
-console.log("ArchiveDate: Creating Pagination Component Name: ", this.pagination_component_name);
-
             this.getPosts();
+        },
+
+        mounted() {
+            this.updateHTMLTitle("Archive: "+this.monthTitle);
         },
 
         methods: {
@@ -105,6 +110,7 @@ console.log("ArchiveDate: Creating Pagination Component Name: ", this.pagination
                       if( result.posts.length == 0){
                           this.error = true; //alternate content control too
                           console.log("PostSlug Found, no data");
+
                       }else{
                           this.posts = result.posts;
                       }

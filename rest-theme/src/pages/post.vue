@@ -20,9 +20,9 @@ article img{
 
         <div :class="['posts-wrapper', {'content-loading': loading, 'content-loaded':(!loading) } ]">
             <loading v-if="(loading)"></loading>
-            <not-found v-if="(!loading && posts.length == 0)"></not-found>
+            <not-found v-if="(!loading && posts.length == 0)" :slug="post_slug"></not-found>
 
-            <!-- likwly should use a separate component for post-content & post-excerpt -->
+            <!-- likely should use a separate component for post-content & post-excerpt -->
             <transition name="fade" appear>
               <router-view name="post-list" :isSingle="isSingle" :posts="posts" :key="this.$route.fullPath"></router-view>
             </transition>
@@ -34,8 +34,8 @@ article img{
 </template>
 
 <script>
-    import WordpressService from '../services/wordpress';
     import Mixin from '../globals.js';
+    import WordpressService from '../services/wordpress';
 
     import NotFound from '../components/not-found.vue';
     import Loading from '../components/loading.vue';
@@ -88,6 +88,8 @@ article img{
                           console.log("PostSlug Found, no data");
                       }else{
                           this.posts = result.posts;
+
+                          this.updateHTMLTitle(this.posts[0].title.rendered);
                       }
 
                   })

@@ -7,7 +7,7 @@
     <main class="content">
 
         <loading v-if="(loading)"></loading>
-        <not-found v-if="(!loading && error)"></not-found>
+        <not-found v-if="(!loading && error)" :slug="Home"></not-found>
 
         <article class="page" v-if="(page.id > 0)">
             <h1 class="entry-title">{{ page.title.rendered }}</h1>
@@ -21,12 +21,15 @@
 </template>
 
 <script>
+    import Mixin from '../globals.js';
     import WordpressService from '../services/wordpress';
 
     import NotFound from '../components/not-found.vue';
     import Loading from '../components/loading.vue';
 
     export default {
+        mixins: [Mixin],
+
         components: {
           NotFound, Loading
         },
@@ -48,6 +51,8 @@
 
         mounted() {
             this.getPage();
+
+            this.updateHTMLTitle("");
         },
 
         methods: {

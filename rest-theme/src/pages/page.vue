@@ -7,7 +7,7 @@
     <main class="content">
 
         <loading v-if="(loading)"></loading>
-        <not-found v-if="(!loading && error)"></not-found>
+        <not-found v-if="(!loading && error)" :slug="post_slug"></not-found>
 
         <article class="page" v-if="(page.id > 0)">
             <h1 class="entry-title">{{ page.title.rendered }}</h1>
@@ -21,12 +21,15 @@
 </template>
 
 <script>
+    import Mixin from '../globals.js';
     import WordpressService from '../services/wordpress';
 
     import NotFound from '../components/not-found.vue';
     import Loading from '../components/loading.vue';
 
     export default {
+        mixins: [Mixin],
+
         components: {
           NotFound, Loading
         },
@@ -62,8 +65,11 @@
                       if( result.posts.length == 0){
                           this.error = true; //alternate content control too
                           console.log("PageSlug Found, no data");
+
                       }else{
                           this.page = result.posts[0];
+
+                          this.updateHTMLTitle(this.page.title.rendered);
                       }
 
                   })

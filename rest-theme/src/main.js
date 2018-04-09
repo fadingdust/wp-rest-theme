@@ -8,6 +8,9 @@ import router from './router.js'
 import Footer from './components/theme-footer.vue';
 Vue.component('theme-footer', Footer);
 
+
+import Mixin from './globals.js';
+
 //var App =
 new Vue({
     el: '#app',
@@ -18,13 +21,9 @@ new Vue({
               '<theme-footer></theme-footer></div>',
 
     mounted() {
-        this.updateTitle('');
     },
 
     methods: {
-        updateTitle(pageTitle) {
-            document.title = (pageTitle ? pageTitle + ' - ' : '') + wp.site_name;
-        },
 
     },
 
@@ -59,11 +58,6 @@ new Vue({
         });
     },
 
-    events: {
-        'page-title': function(pageTitle) {
-            this.updateTitle(pageTitle);
-        }
-    }
 });
 
 

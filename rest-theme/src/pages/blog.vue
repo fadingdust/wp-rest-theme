@@ -11,7 +11,7 @@
 
         <div :class="['posts-wrapper', {'content-loading': loading, 'content-loaded':(!loading) } ]" v-if="(posts)">
             <loading v-if="(loading)"></loading>
-            <not-found v-if="(!loading && posts.length == 0)"></not-found>
+            <not-found v-if="(!loading && posts.length == 0)" :slug="News"></not-found>
 
             <transition name="fade" appear>
               <router-view name="post-list" :posts="posts" :key="this.$route.fullPath"></router-view>
@@ -35,12 +35,14 @@
 
 <script>
     import Config from '../app.config.js'
+    import Mixin from '../globals.js';
     import WordpressService from '../services/wordpress';
 
     import NotFound from '../components/not-found.vue';
     import Loading from '../components/loading.vue';
 
     export default {
+        mixins: [Mixin],
 
         components: {
           NotFound, Loading
@@ -68,6 +70,8 @@
 
           this.getPosts();
 
+            this.updateHTMLTitle("Archive: News, Page "+this.params.paged_index);
+
           next(); // don't forget to call next()
         },
 
@@ -79,6 +83,8 @@
               if( this.pagination_component_name.indexOf("-Paged") < 0) this.pagination_component_name=this.pagination_component_name+"-Paged"; //the pagination component will always be paged!
 
             this.getPosts();
+
+            this.updateHTMLTitle("Archive: News");
         },
 
         methods: {
