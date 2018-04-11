@@ -33,6 +33,9 @@ body>noscript,
   display: flex;
   flex-flow: column;
 }
+#app-root>.container{
+  min-height: 60vh;
+}
 
 #content { }
 
@@ -214,11 +217,11 @@ ul.dropdown-menu.show{
 }
 
 /** Child-Route Transitions: Posts **/
+
 .posts-wrapper{
   width:100%;
   overflow:hidden;
   position: relative;
-  min-height: 60vh;
 }
 .posts-wrapper:after{
   transition: transform .45s ease;

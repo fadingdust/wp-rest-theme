@@ -58,21 +58,17 @@ article img{
                 loading: true,
                 error: false,
                 base_path: wp.base_path,
-                isSingle: false,
+                isSingle: true,
+                params: { post_type: 'post' },
                 posts: []
             }
         },
 
         created: function() {
 
-                let post_type = this.post_type;
-                if (!this.post_type) post_type = 'post';
+            this.params = { ...this.params, ...this.$props, ...this.$route.params }; // right-most wins
 
-                let post_slug = this.post_slug;
-                if (!this.post_slug) post_slug = this.$route.params.post_slug;
-
-                this.getPost(post_type, post_slug);
-                this.isSingle = true;
+            this.getPost( this.params.post_type, this.params.post_slug);
 
         },
 

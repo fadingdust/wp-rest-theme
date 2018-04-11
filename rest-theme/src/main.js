@@ -11,6 +11,11 @@ Vue.component('theme-footer', Footer);
 
 import Mixin from './globals.js';
 
+
+/**
+ * Note: App-Root Template loads in Google-Bot
+ */
+
 //var App =
 new Vue({
     el: '#app',

@@ -12,10 +12,12 @@ import Config from '../app.config.js'
 let wordpressService = {
 
   getFromAPI: function( path, resolve, reject ){
-
+        const apiTime = new Date();
         Vue.http.get( path )
           .then(response => {
               if( typeof response.data !== 'object') reject( response );
+              const apiTimeDiff = ((new Date())-apiTime);
+              console.log("apiTime:", apiTimeDiff ); // TODO: track render & api times
 
               let responseData = {posts: response.data,  totalPosts: parseInt(response.headers.map['x-wp-total'][0]),  totalPages: parseInt(response.headers.map['x-wp-totalpages'][0])  };
               resolve( responseData );
@@ -86,6 +88,7 @@ let wordpressService = {
     })
   },
 
+//////////////// Non-Posts ////////////////
   getAuthorInfo: function( author_slug ) {
     let path = Config.root + "wp-json/wp/v2/users/?username="+author_slug;
     return new Promise((resolve, reject) => {
