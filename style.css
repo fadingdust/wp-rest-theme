@@ -33,6 +33,9 @@ body>noscript,
   display: flex;
   flex-flow: column;
 }
+#app-root>.container{
+  min-height: 60vh;
+}
 
 #content { }
 
@@ -61,6 +64,8 @@ section {
 	margin-bottom: 50px;
 	box-shadow: 0 1px 1px rgba(0, 0, 0, 0.1);
 }
+
+ul.list-inline li{display:inline-block;margin-left: 8px;}
 
 /* Bootstrap: */
 .site-header .navbar-brand{
@@ -122,6 +127,12 @@ ul.dropdown-menu.show{
 .alignleft{float:left;margin: 2px 8px 8px 0;}
 .wp-caption-text{margin-top:0;}
 
+.pagination p{display:inline-block;padding: 5px;}
+.posts-pagination li a{display:inline-block;padding: 5px;min-width:40px;text-align:center;}
+.posts-pagination li:hover{background-color:#f9f9f9;}
+.posts-pagination li a.router-link-active,
+.posts-pagination li.active a{background-color:#fff};
+
 .entry-title {
 	font-size: 30px;
 	line-height: 1.3em;
@@ -129,6 +140,12 @@ ul.dropdown-menu.show{
 }
 
 /* Basic App styling */
+
+.posts-wrapper{
+  min-height: 40vh;
+  position: relative;
+  overflow:hidden;
+}
 
 .notifications{
   height: 30px;
@@ -162,4 +179,70 @@ ul.dropdown-menu.show{
 	90% { opacity: 1; transform: translateY(0px);}
 	99% { opacity: 0; transform: translateY(-30px);}
 	100% { opacity: 0;z-index:-1 }
+}
+
+
+/** Parent-Route Transitions **/
+
+.parent-fade-enter {
+  opacity: 0;
+}
+
+.parent-fade-enter-active {
+  transition: opacity .6s ease-in;
+}
+
+.parent-fade-leave {}
+
+.parent-fade-leave-active {
+  transition: all .4s ease-out;
+  opacity: 0;
+}
+/** Child-Route Transitions **/
+
+.fade-enter {
+  opacity: 0;
+}
+
+.fade-enter-active {
+  transition: opacity .4s ease-in;
+}
+
+.fade-leave {}
+
+.fade-leave-active {
+  transition: all .3s ease-out;
+  opacity: 0;
+  position:absolute;top:0;
+}
+
+/** Child-Route Transitions: Posts **/
+
+.posts-wrapper{
+  width:100%;
+  overflow:hidden;
+  position: relative;
+}
+.posts-wrapper:after{
+  transition: transform .45s ease;
+  content:'';
+  display:block;
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top:0;
+  left:0;
+  box-shadow: 0 -20px 20px rgba(237,238,238,.9);/* debatably useful */
+  background: #eee;
+
+  /* Permalink - use to edit and share this gradient: http://colorzilla.com/gradient-editor/#eeeeee+0,ffffff+100
+  background: linear-gradient(to bottom, rgba(238,238,238,1) 0%,rgba(255,255,255,1) 100%);
+  */
+
+}
+.posts-wrapper.content-loading:after{
+  transform:translateY(0%);
+}
+.posts-wrapper.content-loaded:after{
+  transform:translateY( 101%);
 }

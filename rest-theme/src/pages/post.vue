@@ -15,63 +15,42 @@ article img{
 </style>
 
 <template>
-    <article :id="( post_id(this_post)) " :class="( post_classes(this_post) )" v-if="(this_post.id > 0)">
+<div class="page-wrapper">
+    <main class="content">
 
-        <h1 class="entry-title" v-if="isSingle">{{ this_post.title.rendered }}</h1>
-        <h2 class="entry-title" v-else><router-link :to="( this_post.permalink_path )">{{ this_post.title.rendered }}</router-link></h2>
+        <div :class="['posts-wrapper', {'content-loading': loading, 'content-loaded':(!loading) } ]">
+            <loading v-if="(loading)"></loading>
+            <not-found v-if="(!loading && posts.length == 0)" :slug="post_slug"></not-found>
 
-        <div class="entry-content" v-if="isSingle" v-html="this_post.content.rendered"> </div>
-        <div class="entry-content" v-else v-html="this_post.excerpt.rendered"> </div>
+            <!-- likely should use a separate component for post-content & post-excerpt -->
+            <transition name="fade" appear>
+              <router-view name="post-list" :isSingle="isSingle" :posts="posts" :key="this.$route.fullPath"></router-view>
+            </transition>
+        </div>
 
-        <footer>
-          <div class="entry-meta">
+    </main>
 
-            <p class="author-info"><span>Written by</span>
-              <span class="author" v-if="(this_post.author_object)">
-                <router-link :to="{ path: this_post.author_object.permalink_path }">{{this_post.author_object.nickname}}</router-link>
-              </span>
-            </p>
-
-            <p class="date-info"><span>on</span>
-              <span class="date" v-if="(this_post.date_rendered)">
-                <router-link :to="{ path: this_post.date_archive.path }">{{this_post.date_rendered}}</router-link>
-              </span>
-            </p>
-
-            <p class="category-list"><span>in categories</span>
-              <span class="category" v-for="category in this_post.categories_list" v-bind:key="category.id">
-                <router-link :to="{ path: category.permalink_path }">{{category.name}}</router-link>&nbsp;
-              </span>
-            </p>
-
-
-          </div>
-        </footer>
-
-    </article>
+</div>
 </template>
 
 <script>
-    import WordpressService from '../services/wordpress';
     import Mixin from '../globals.js';
+    import WordpressService from '../services/wordpress';
+
+    import NotFound from '../components/not-found.vue';
+    import Loading from '../components/loading.vue';
+    import PostList from '../components/post-list.vue';
 
     export default {
         mixins: [Mixin],
 
+        components:{
+          PostList, NotFound, Loading
+        },
+
         props: {
             post_slug: { type: String },
             post_type: { type: String },
-            post: {
-                type: Object,
-                default() {
-                    return {
-                        id: 0,
-                        permalink_path: '',
-                        title: { rendered: '' },
-                        content: { rendered: '' }
-                    }
-                }
-            }
         },
 
         data: function() {
@@ -79,30 +58,17 @@ article img{
                 loading: true,
                 error: false,
                 base_path: wp.base_path,
-                isSingle: false,
-                this_post: {
-                        id: 0,
-                        permalink_path: '',
-                        title: { rendered: '' },
-                        content: { rendered: '' }
-                }
+                isSingle: true,
+                params: { post_type: 'post' },
+                posts: []
             }
         },
 
         created: function() {
-            if (!this.post.id) {
-                let post_type = this.post_type;
-                if (!this.post_type) post_type = 'post';
 
-                let post_slug = this.post_slug;
-                if (!this.post_slug) post_slug = this.$route.params.post_slug;
+            this.params = { ...this.params, ...this.$props, ...this.$route.params }; // right-most wins
 
-                this.getPost(post_type, post_slug);
-                this.isSingle = true;
-
-            }else{  // Likely an Excerpt in an Archive
-                this.this_post = this.post;
-            }
+            this.getPost( this.params.post_type, this.params.post_slug);
 
         },
 
@@ -117,7 +83,9 @@ article img{
                           this.error = true; //alternate content control too
                           console.log("PostSlug Found, no data");
                       }else{
-                          this.this_post = result.posts[0];
+                          this.posts = result.posts;
+
+                          this.updateHTMLTitle(this.posts[0].title.rendered);
                       }
 
                   })

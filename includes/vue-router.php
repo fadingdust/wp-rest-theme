@@ -76,25 +76,98 @@ class WP_Vue_Router_Context{
         $pages = get_pages();
         $domain = get_option('home');
 
+
+        if( $frontpage_id == $blog_home_id && $frontpage_id == "0"){  // neither are defined: show posts on home
+                $thisRoute=new stdClass();
+                $thisRoute->name = 'Home';
+                  $thisRoute->path = "/";
+                  $thisRoute->component = "Blog";
+
+                    // UNPAGED BLOG-HOME:
+                    $thisChildRoute=new stdClass();
+                    $thisChildRoute->name = 'Home-UnPaged';
+                    $thisChildRoute->path = ""; // rewrite['slug']
+                    $thisChildRoute->component="PostList"; //$this->template_name_cleanup($component_name);
+                      //Add in extra meta
+                    $thisChildRoute->props = new stdClass();
+                    $thisChildRoute->props->default = true;
+                    $thisChildRoute->props->post_type = 'post';  // BUG: ???
+                    $thisChildRoute->props->post_types = 'post'; //$taxonomy->object_type;
+                      //Export
+                    $thisRoute->children=array( $thisChildRoute );
+                    $thisChildRoute=null;
+
+                    // PAGED BLOG-HOME:
+                    $thisChildRoute=new stdClass();
+                    $thisChildRoute->name = 'Home-Paged';
+                    $thisChildRoute->path = "page/:paged_index([\d]*)/"; // rewrite['slug']
+                    $thisChildRoute->component="PostList"; //$this->template_name_cleanup($component_name);
+                      //Add in extra meta
+                    $thisChildRoute->props = new stdClass();
+                    $thisChildRoute->props->default = true;
+                    $thisChildRoute->props->post_type = 'post';  // BUG: ???
+                    $thisChildRoute->props->post_types = 'post'; //$taxonomy->object_type;
+                      //Export
+                    $thisRoute->children[] = $thisChildRoute ;
+                    $thisChildRoute=null;
+
+                  //Export
+                $routes[] = $thisRoute;
+                $component_templates[] = $thisRoute->component;
+                $thisRoute=null;
+        }
+
         foreach ( $pages as $page ) {
             // Routes[] = { path: '/gallery/', component: Archive}
             $full_path=str_replace( array($domain, 'https://', 'http://', $_SERVER['HTTP_HOST']), '', get_the_permalink($page->ID) ); //Pare off what the registered wp domain, but also any other domain this might be run on
             $page_template_slug = str_replace(".php", "", get_page_template_slug( $page->ID ) );
             if($page_template_slug) $component_name = basename($page_template_slug);
 
-            if( $page->ID == $blog_home_id){
+            if( $page->ID == $blog_home_id ){
                 $thisRoute=new stdClass();
+                $thisRoute->name = 'Blog';
                   $thisRoute->path = $full_path;
                   $thisRoute->component = "Blog";
+
+                    // UNPAGED BLOG:
+                    $thisChildRoute=new stdClass();
+                    $thisChildRoute->name = 'Blog-UnPaged';
+                    $thisChildRoute->path = ""; // rewrite['slug']
+                    $thisChildRoute->component="PostList"; //$this->template_name_cleanup($component_name);
+                      //Add in extra meta
+                    $thisChildRoute->props = new stdClass();
+                    $thisChildRoute->props->default = true;
+                    $thisChildRoute->props->post_type = 'post';  // BUG: ???
+                    $thisChildRoute->props->post_types = 'post'; //$taxonomy->object_type;
+                      //Export
+                    $thisRoute->children=array( $thisChildRoute );
+                    $thisChildRoute=null;
+
+                    // PAGED BLOG:
+                    $thisChildRoute=new stdClass();
+                    $thisChildRoute->name = 'Blog-Paged';
+                    $thisChildRoute->path = "page/:paged_index([\d]*)/"; // rewrite['slug']
+                    $thisChildRoute->component="PostList"; //$this->template_name_cleanup($component_name);
+                      //Add in extra meta
+                    $thisChildRoute->props = new stdClass();
+                    $thisChildRoute->props->default = true;
+                    $thisChildRoute->props->post_type = 'post';  // BUG: ???
+                    $thisChildRoute->props->post_types = 'post'; //$taxonomy->object_type;
+                      //Export
+                    $thisRoute->children[] = $thisChildRoute ;
+                    $thisChildRoute=null;
+
                   //Export
                 $routes[] = $thisRoute;
                 $component_templates[] = $thisRoute->component;
                 $thisRoute=null;
 
+
             } else if( $page->ID == $frontpage_id){
                 $thisRoute=new stdClass();
-                  $thisRoute->path = $full_path;
-                  $thisRoute->component = "Home";
+                  $thisRoute->path = "/";// $full_path;
+                  $thisRoute->name = 'Home';
+                  $thisRoute->component = "FrontPage";
                   $thisRoute->params = array("post_slug"=>$page->post_name);
                   //Add in extra meta, since '/' is a terrible slug (and inaccurate)
                   $thisRoute->props = new stdClass();
@@ -141,7 +214,7 @@ class WP_Vue_Router_Context{
 
         foreach ( $taxonomies as $taxonomy ) {
             $thisRoute=new stdClass();
-              $thisRoute->name = 'Taxonomy-'.ucwords($taxonomy->name)."-Post";
+              $thisRoute->name = 'Taxonomy-'.ucwords($taxonomy->name)."-Archive";
               $thisRoute->path = "/".$taxonomy->rewrite['slug']."/:term_slug/"; //rewrite['slug']
               $thisRoute->component=$this->template_name_cleanup($component_name);
               //Add in extra meta
@@ -152,14 +225,14 @@ class WP_Vue_Router_Context{
               $thisRoute->props->taxonomy_name = $taxonomy->name;   //rewrite['slug'];
               $thisRoute->props->taxonomy_slug = $taxonomy->rewrite['slug'];
               //TODO: Consider adding tax-id?
-
+/*
             $routes[] = $thisRoute;
             $component_templates[] = $thisRoute->component;
             $thisRoute=null;
 
             // PAGED ARCHIVE:
             $thisRoute=new stdClass();
-            $thisRoute->name = 'Taxonomy-'.ucwords($taxonomy->name).'-Paged';
+            $thisRoute->name = 'Taxonomy-'.ucwords($taxonomy->name).'-Archive-Paged';
             $thisRoute->path = "/".$taxonomy->rewrite['slug']."/:term_slug/page/:paged_index([\d]*)/"; // rewrite['slug']
             $thisRoute->component=$this->template_name_cleanup($component_name);
               //Add in extra meta
@@ -169,6 +242,43 @@ class WP_Vue_Router_Context{
             $thisRoute->props->post_types = $taxonomy->object_type;
             $thisRoute->props->taxonomy_name = $taxonomy->name;   //rewrite['slug'];
             $thisRoute->props->taxonomy_slug = $taxonomy->rewrite['slug'];
+*/
+
+
+                    // UNPAGED BLOG:
+                    $thisChildRoute=new stdClass();
+                    $thisChildRoute->name = $thisRoute->name.'-UnPaged';
+                    $thisChildRoute->path = ""; // rewrite['slug']
+                    $thisChildRoute->component="PostList"; //$this->template_name_cleanup($component_name);
+                      //Add in extra meta
+                    $thisChildRoute->props = new stdClass();
+                    $thisChildRoute->props->default = true;
+                    $thisChildRoute->props->post_type = $thisRoute->props->post_type;  // BUG: ???
+                    $thisChildRoute->props->post_types = $thisRoute->props->post_types; //$taxonomy->object_type;
+                    $thisChildRoute->props->taxonomy_name = $thisRoute->props->taxonomy_name;   //rewrite['slug'];
+                    $thisChildRoute->props->taxonomy_slug = $thisRoute->props->taxonomy_slug;
+
+                      //Export
+                $thisRoute->children=array( $thisChildRoute );
+                $thisChildRoute=null;
+
+                    // PAGED BLOG:
+                    $thisChildRoute=new stdClass();
+                    $thisChildRoute->name =  $thisRoute->name.'-Paged';
+                    $thisChildRoute->path = "page/:paged_index([\d]*)/"; // rewrite['slug']
+                    $thisChildRoute->component="PostList"; //$this->template_name_cleanup($component_name);
+                      //Add in extra meta
+                    $thisChildRoute->props = new stdClass();
+                    $thisChildRoute->props->default = true;
+                    $thisChildRoute->props->post_type = $thisRoute->props->post_type;  // BUG: ???
+                    $thisChildRoute->props->post_types = $thisRoute->props->post_types; //$taxonomy->object_type;
+                    $thisChildRoute->props->taxonomy_name = $thisRoute->props->taxonomy_name;   //rewrite['slug'];
+                    $thisChildRoute->props->taxonomy_slug = $thisRoute->props->taxonomy_slug;
+
+                      //Export
+                $thisRoute->children[] = $thisChildRoute ;
+                $thisChildRoute=null;
+
 
               //Export
             $routes[] = $thisRoute;
@@ -205,6 +315,43 @@ class WP_Vue_Router_Context{
             $thisRoute->props->post_types = $term_post_types;
               //TODO: Consider adding term-id?
 
+
+                    // UNPAGED BLOG:
+                    $thisChildRoute=new stdClass();
+                    $thisChildRoute->name = $thisRoute->name.'-UnPaged';
+                    $thisChildRoute->path = ""; // rewrite['slug']
+                    $thisChildRoute->component="PostList"; //$this->template_name_cleanup($component_name);
+                      //Add in extra meta
+                    $thisChildRoute->props = new stdClass();
+                    $thisChildRoute->props->default = true;
+                    $thisChildRoute->props->post_type = $thisRoute->props->post_type;  // BUG: ???
+                    $thisChildRoute->props->term_slug = $thisRoute->props->term_slug;
+                    $thisChildRoute->props->taxonomy_name = $thisRoute->props->taxonomy_name;   //rewrite['slug'];
+                    $thisChildRoute->props->taxonomy_slug = $thisRoute->props->taxonomy_slug;
+
+                      //Export
+                $thisRoute->children=array( $thisChildRoute );
+                $thisChildRoute=null;
+
+                    // PAGED BLOG:
+                    $thisChildRoute=new stdClass();
+                    $thisChildRoute->name =  $thisRoute->name.'-Paged';
+                    $thisChildRoute->path = "page/:paged_index([\d]*)/"; // rewrite['slug']
+                    $thisChildRoute->component="PostList"; //$this->template_name_cleanup($component_name);
+                      //Add in extra meta
+                    $thisChildRoute->props = new stdClass();
+                    $thisChildRoute->props->default = true;
+                    $thisChildRoute->props->post_type = $thisRoute->props->post_type;  // BUG: ???
+                    $thisChildRoute->props->term_slug = $thisRoute->props->term_slug;
+                    $thisChildRoute->props->taxonomy_name = $thisRoute->props->taxonomy_name;   //rewrite['slug'];
+                    $thisChildRoute->props->taxonomy_slug = $thisRoute->props->taxonomy_slug;
+
+                      //Export
+                $thisRoute->children[] = $thisChildRoute ;
+                $thisChildRoute=null;
+
+
+
               //Export
             if( $add_route ){
                 $routes[] = $thisRoute;
@@ -229,6 +376,47 @@ class WP_Vue_Router_Context{
             $thisRoute->props->taxonomy_slug = $term->taxonomy;    //$term_tax->rewrite['slug'];
             $thisRoute->props->post_types = $term_post_types;
               //TODO: Consider adding term-id?
+
+
+                    // UNPAGED BLOG:
+                    $thisChildRoute=new stdClass();
+                    $thisChildRoute->name = $thisRoute->name.'-UnPaged';
+                    $thisChildRoute->path = ""; // rewrite['slug']
+                    $thisChildRoute->component="PostList"; //$this->template_name_cleanup($component_name);
+                      //Add in extra meta
+                    $thisChildRoute->props = new stdClass();
+                    $thisChildRoute->props->default = true;
+                    $thisChildRoute->props->post_type = $thisRoute->props->post_type;  // BUG: ???
+                    $thisChildRoute->props->post_types = $thisRoute->props->post_types;  // BUG: ???
+                    $thisChildRoute->props->term_slug = $thisRoute->props->term_slug;
+                    $thisChildRoute->props->taxonomy_name = $thisRoute->props->taxonomy_name;   //rewrite['slug'];
+                    $thisChildRoute->props->taxonomy_id = $thisRoute->props->taxonomy_id;
+                    $thisChildRoute->props->taxonomy_slug = $thisRoute->props->taxonomy_slug;
+
+                      //Export
+                $thisRoute->children=array( $thisChildRoute );
+                $thisChildRoute=null;
+
+                    // PAGED BLOG:
+                    $thisChildRoute=new stdClass();
+                    $thisChildRoute->name =  $thisRoute->name.'-Paged';
+                    $thisChildRoute->path = "page/:paged_index([\d]*)/"; // rewrite['slug']
+                    $thisChildRoute->component="PostList"; //$this->template_name_cleanup($component_name);
+                      //Add in extra meta
+                    $thisChildRoute->props = new stdClass();
+                    $thisChildRoute->props->default = true;
+                    $thisChildRoute->props->post_type = $thisRoute->props->post_type;  // BUG: ???
+                    $thisChildRoute->props->post_types = $thisRoute->props->post_types;  // BUG: ???
+                    $thisChildRoute->props->term_slug = $thisRoute->props->term_slug;
+                    $thisChildRoute->props->taxonomy_name = $thisRoute->props->taxonomy_name;   //rewrite['slug'];
+                    $thisChildRoute->props->taxonomy_id = $thisRoute->props->taxonomy_id;
+                    $thisChildRoute->props->taxonomy_slug = $thisRoute->props->taxonomy_slug;
+
+                      //Export
+                $thisRoute->children[] = $thisChildRoute ;
+                $thisChildRoute=null;
+
+
 
               //Export
             if( $add_route ){
@@ -271,6 +459,39 @@ class WP_Vue_Router_Context{
             $thisRoute->props->post_type = $post_type; //to deprecate
             $thisRoute->props->post_types = array($post_type);
 
+
+                    // UNPAGED BLOG:
+                    $thisChildRoute=new stdClass();
+                    $thisChildRoute->name = $thisRoute->name.'-UnPaged';
+                    $thisChildRoute->path = ""; // rewrite['slug']
+                    $thisChildRoute->component="PostList"; //$this->template_name_cleanup($component_name);
+                      //Add in extra meta
+                    $thisChildRoute->props = new stdClass();
+                    $thisChildRoute->props->default = true;
+                    $thisChildRoute->props->post_type = $thisRoute->props->post_type;  // BUG: ???
+                    $thisChildRoute->props->post_types = $thisRoute->props->post_types;  // BUG: ???
+
+                      //Export
+                $thisRoute->children=array( $thisChildRoute );
+                $thisChildRoute=null;
+
+                    // PAGED BLOG:
+                    $thisChildRoute=new stdClass();
+                    $thisChildRoute->name =  $thisRoute->name.'-Paged';
+                    $thisChildRoute->path = "page/:paged_index([\d]*)/"; // rewrite['slug']
+                    $thisChildRoute->component="PostList"; //$this->template_name_cleanup($component_name);
+                      //Add in extra meta
+                    $thisChildRoute->props = new stdClass();
+                    $thisChildRoute->props->default = true;
+                    $thisChildRoute->props->post_type = $thisRoute->props->post_type;  // BUG: ???
+                    $thisChildRoute->props->post_types = $thisRoute->props->post_types;  // BUG: ???
+
+                      //Export
+                $thisRoute->children[] = $thisChildRoute ;
+                $thisChildRoute=null;
+
+
+
               //Export
             $routes[] = $thisRoute;
             $component_templates[] = $thisRoute->component;
@@ -285,6 +506,37 @@ class WP_Vue_Router_Context{
             $thisRoute->props = new stdClass();
             $thisRoute->props->default = true;
             $thisRoute->props->post_types = array($post_type);
+
+
+                    // UNPAGED BLOG:
+                    $thisChildRoute=new stdClass();
+                    $thisChildRoute->name = $thisRoute->name.'-UnPaged';
+                    $thisChildRoute->path = ""; // rewrite['slug']
+                    $thisChildRoute->component="PostList"; //$this->template_name_cleanup($component_name);
+                      //Add in extra meta
+                    $thisChildRoute->props = new stdClass();
+                    $thisChildRoute->props->default = true;
+                    $thisChildRoute->props->post_type = $thisRoute->props->post_type;  // BUG: ???
+                    $thisChildRoute->props->post_types = $thisRoute->props->post_types;  // BUG: ???
+
+                      //Export
+                $thisRoute->children=array( $thisChildRoute );
+                $thisChildRoute=null;
+
+                    // PAGED BLOG:
+                    $thisChildRoute=new stdClass();
+                    $thisChildRoute->name =  $thisRoute->name.'-Paged';
+                    $thisChildRoute->path = "page/:paged_index([\d]*)/"; // rewrite['slug']
+                    $thisChildRoute->component="PostList"; //$this->template_name_cleanup($component_name);
+                      //Add in extra meta
+                    $thisChildRoute->props = new stdClass();
+                    $thisChildRoute->props->default = true;
+                    $thisChildRoute->props->post_type = $thisRoute->props->post_type;  // BUG: ???
+                    $thisChildRoute->props->post_types = $thisRoute->props->post_types;  // BUG: ???
+
+                $thisRoute->children[] = $thisChildRoute ;
+                $thisChildRoute=null;
+
 
               //Export
             $routes[] = $thisRoute;
@@ -305,16 +557,37 @@ class WP_Vue_Router_Context{
 
         // WP Defaults:
         $wp_defaults = json_decode('[
-            { "path": "/search/:term_slug/page/:paged_index/", "component": "Search", "props": true},
-            { "path": "/search/:term_slug/", "component": "Search", "props": true},
-            { "path": "/author/:author_slug/page/:paged_index/", "component": "Author", "props": true},
-            { "path": "/author/:author_slug/", "component": "Author", "props": true},
-            { "path": "/:year/:month/:day/page/:paged_index/", "component": "ArchiveDate", "props": true},
-            { "path": "/:year/:month/:day/", "component": "ArchiveDate", "props": true},
-            { "path": "/:year/:day/page/:paged_index/", "component": "ArchiveDate", "props": true},
-            { "path": "/:year/:day/", "component": "ArchiveDate", "props": true},
-            { "path": "/:year/page/:paged_index/", "component": "ArchiveDate", "props": true},
-            { "path": "/:year/", "component": "ArchiveDate", "props": true}]');
+            { "name":"Search-Archive", "path": "/search/:term_slug/", "component": "Search", "props": true,
+                "children":[
+                    { "name":"Search-Archive-UnPaged", "path": "", "component": "PostList", "props": true},
+                    { "name":"Search-Archive-Paged", "path": "page/:paged_index/", "component": "PostList", "props": true}
+                ]
+            },
+            { "name":"Author-Archive", "path": "/author/:author_slug/", "component": "Author", "props": true,
+                "children":[
+                    { "name":"Author-Archive-UnPaged", "path": "", "component": "PostList", "props": true},
+                    { "name":"Author-Archive-Paged", "path": "page/:paged_index/", "component": "PostList", "props": true}
+                ]
+            },
+            { "name":"Year-Archive", "path": "/:year/", "component": "ArchiveDate", "props": true,
+                "children":[
+                    { "name":"Year-Archive-UnPaged", "path": "", "component": "PostList", "props": true},
+                    { "name":"Year-Archive-Paged", "path": "page/:paged_index/", "component": "PostList", "props": true}
+                ]
+            },
+            { "name":"Month-Archive", "path": "/:year/:month/", "component": "ArchiveDate", "props": true,
+                "children":[
+                    { "name":"Month-Archive-UnPaged", "path": "", "component": "PostList", "props": true},
+                    { "name":"Month-Archive-Paged", "path": "page/:paged_index/", "component": "PostList", "props": true}
+                ]
+            },
+            { "name":"Date-Archive", "path": "/:year/:month/:day/", "component": "ArchiveDate", "props": true,
+                "children":[
+                    { "name":"Date-Archive-UnPaged", "path": "", "component": "PostList", "props": true},
+                    { "name":"Date-Archive-Paged", "path": "page/:paged_index/", "component": "PostList", "props": true}
+                ]
+            }
+            ]');
 
         $component_templates[] = "Search";
         $component_templates[] = "Author";
@@ -323,8 +596,11 @@ class WP_Vue_Router_Context{
         //json_decode hates this "ensure it's a number" regex:  ([\d]*)
         foreach($wp_defaults  as $i => $route){
             $wp_defaults[$i]->path = str_replace(array("/:year/", "/:month/", "/:day/", "/:paged_index/"),array("/:year([\d]*)/", "/:month([\d]*)/", "/:day([\d]*)/", "/:paged_index([\d]*)/"), $route->path);
-        }
+            foreach($wp_defaults[$i]->children  as $c => $child_route){
+                $wp_defaults[$i]->children[$c]->path = str_replace(array("/:year/", "/:month/", "/:day/", "/:paged_index/"),array("/:year([\d]*)/", "/:month([\d]*)/", "/:day([\d]*)/", "/:paged_index([\d]*)/"), $child_route->path);
+            }
 
+        }
 
         // DEFAULT: Non-Parent Post
         //don't want this higher than the blog-post-home, nor /year/

@@ -16,11 +16,11 @@ This project has multiple branches. Each branch adds a feature overtop the prior
 
 ### Usage
 
-To use the theme on your WordPress site just install it like any other theme, but you'll likely need to compile the dist/build.js file.
+To use the theme on your WordPress site just install it like any other theme, but you'll likely need to compile the dist/main.min.js file.
 
 ### Customization
 
-All of the Vue.js specific code is in the `rest-theme/src` folder. To build the `dist/build.js` script while
+All of the Vue.js specific code is in the `rest-theme/src` folder. To build the `dist/main.min.js` script while
 developing run the following from the theme root:
 
 ```
@@ -37,7 +37,18 @@ npm run build
 
 [List of supported URIs](docs/TESTING.md)
 
+
+### DEBUG:
+* term archives with multiple post_types: /path/wp-json/wp/v2/post,news?news_type=194
+
+### TODO:
+* Home: blog vs. page
+* Sticky Posts: separate query: &sticky=1/0
+* Password Protection: &password=abc123
+* Widgets (able to be AJAX'd)
+
 ### History
+* 2018-04: Pagination, Transitions.
 * 2018-04: Using native WP Nav, subdirectory installs safe.
 * 2018-03: WordpressRoute Builder added
 * 2018-03: Vue 2.0 Compatible (@MW)

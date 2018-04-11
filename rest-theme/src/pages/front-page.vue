@@ -1,5 +1,5 @@
 <style>
-
+.content{min-height: 40vh;}
 </style>
 
 <template>
@@ -7,7 +7,7 @@
     <main class="content">
 
         <loading v-if="(loading)"></loading>
-        <not-found v-if="(!loading && error)" :slug="post_slug"></not-found>
+        <not-found v-if="(!loading && error)" :slug="Home"></not-found>
 
         <article class="page" v-if="(page.id > 0)">
             <h1 class="entry-title">{{ page.title.rendered }}</h1>
@@ -51,6 +51,8 @@
 
         mounted() {
             this.getPage();
+
+            this.updateHTMLTitle("");
         },
 
         methods: {
@@ -65,11 +67,8 @@
                       if( result.posts.length == 0){
                           this.error = true; //alternate content control too
                           console.log("PageSlug Found, no data");
-
                       }else{
                           this.page = result.posts[0];
-
-                          this.updateHTMLTitle(this.page.title.rendered);
                       }
 
                   })

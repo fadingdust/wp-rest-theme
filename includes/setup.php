@@ -83,3 +83,10 @@ add_action( 'after_setup_theme', function () {
 
 
 });
+
+
+
+function new_excerpt_more($more) {
+  return '&hellip; <a class="read-more" href="' . get_permalink( get_the_ID() ) . '">Continue Reading</a>';
+}
+add_filter('excerpt_more', 'new_excerpt_more');

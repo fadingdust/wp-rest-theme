@@ -1,14 +1,22 @@
 import Vue from 'vue/dist/vue.js'
-import VueRouter from 'vue-router'
 
-Vue.use(require('vue-resource'));
+//Vue.use(require('vue-resource'));
+import VueResource from 'vue-resource';
+Vue.use(VueResource);
+
+import VueRouter from 'vue-router'
 Vue.use(VueRouter);
 
 Vue.config.debug = true
 
-import Posts from './pages/posts.vue';
-const Home = Vue.component('Home', Posts);
-Vue.component('Blog', Posts);
+import FrontPage from './pages/front-page.vue';
+Vue.component('FrontPage', FrontPage);
+
+import Blog from './pages/blog.vue';
+Vue.component('Blog', Blog);
+
+import Page from './pages/page.vue';
+Vue.component('Page', Page);
 
 import Archive from './pages/archive.vue';
 Vue.component('Archive', Archive);
@@ -22,11 +30,11 @@ Vue.component('Author', Author);
 import Search from './pages/search.vue';
 Vue.component('Search', Search);
 
-import Post from './pages/post.vue';
+import Post from './pages/post.vue'; //Single
 Vue.component('Post', Post);
 
-import Page from './pages/page.vue';
-Vue.component('Page', Page);
+import PostList from './components/post-list.vue';
+Vue.component('PostList', PostList);
 
 
 var router = new VueRouter({
@@ -37,17 +45,19 @@ var router = new VueRouter({
   }
 });
 
-router.addRoutes([ {
-    path: '/',
-    component: Home
-}]);
-
 // Convert the Routes made in PHP/Wordpress into actual Component Objects
 for (var key in wp.routes) {
     let route = wp.routes[key];
     let component_name = route.component;
     wp.routes[key].component = Vue.component( component_name );
 
+    if( wp.routes[key].children && wp.routes[key].children.length > 0){
+      for (var child_key in wp.routes[key].children) {
+        let child_component_name = wp.routes[key].children[child_key].component;
+        wp.routes[key].children[child_key].component = null;
+        wp.routes[key].children[child_key].components = { "post-list": Vue.component( child_component_name ) };
+      }
+    }
     if( typeof(wp.routes[key].component) == "undefined" ) console.log("Developer: Please create component named " + component_name );
 }
 router.addRoutes( wp.routes );

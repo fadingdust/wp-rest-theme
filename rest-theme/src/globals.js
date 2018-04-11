@@ -17,8 +17,10 @@ var mixins = {
         if( post.format ) classes+=" post-format-"+ post.format;
         if( post.type ) classes+=" post-type-"+post.type;
         return classes;
-      }
-
+      },
+      updateHTMLTitle(pageTitle) {
+          document.title = (pageTitle ? pageTitle + ' - ' : '') + wp.site_name;
+      },
   }
 
 }
