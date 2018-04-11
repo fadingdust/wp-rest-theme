@@ -54,6 +54,19 @@ add_action( "rest_api_init", function () {
         ),
     ) );
 
+    // Add post meta
+    register_rest_field( $posts_post_types, "meta", array(
+        "get_callback" => function( $post ) {
+
+                return get_post_meta($post['id']);
+        },
+        "schema" => array(
+            "description" => __( "All Post Meta" ),
+            "type"        => "object"
+        ),
+    ) );
+
+
     // Add permalink:
     register_rest_field( $pages_posts_post_types, "permalink_path", array(
         "get_callback" => function( $post ) {
