@@ -89,6 +89,18 @@ add_action( "rest_api_init", function () {
         ),
     ) );
 
+
+    // Add id-list of posts to terms:
+    register_rest_field( array('category','term'), "post_ids", array(
+        "get_callback" => function( $term ) {
+            return get_post_ids($post_types='post', $term['taxonomy'], $term['id']);
+        },
+        "schema" => array(
+            "description" => __( "List of Post-IDs in this Term" ),
+            "type"        => "array"
+        ),
+    ) );
+
     // Add Author Info
     register_rest_field( $posts_post_types, "author_object", array(
         "get_callback" => function( $post ) {
@@ -183,4 +195,26 @@ function wp_rest_custom_taxonomy() {
     }
   }
 
+}
+
+
+function get_post_ids($post_types='post', $taxonomy='category', $term_id){
+    //source: https://wordpress.stackexchange.com/questions/71471/get-all-posts-id-from-a-category?utm_medium=organic&utm_source=google_rich_qa&utm_campaign=google_rich_qa
+    $query_args=array(
+                'numberposts'   => -1, // get all posts.
+                'post_type' => is_array($post_types) ? $post_types : array($post_types),
+                'fields'        => 'ids', // only get post IDs.
+                );
+
+    if($taxonomy && $term_id > 0){
+        $query_args['tax_query'] = array(
+                                            array(
+                                                'taxonomy'  => $taxonomy,
+                                                'field'     => 'id',
+                                                'terms'     => is_array($term_id) ? $term_id : array($term_id),
+                                            ),
+                                        );
+    }
+
+    return get_posts($query_args);
 }
