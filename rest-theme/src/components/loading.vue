@@ -1,6 +1,6 @@
 <template>
 
-    <div class="loading">
+    <div :class="[ {'loading': loading, 'loaded':(!loading) } ]">
 
     </div>
 
@@ -14,9 +14,10 @@
   position: absolute;
   margin-left:-120px;
   left: 50%;
+  opacity:.5;
 }
 
-.loading {
+.loaded {
   opacity: 0;
   animation: fadeOut 1.2s linear backwards;
   animation-delay: .4s;
@@ -31,3 +32,24 @@
 }
 
 </style>
+
+
+<script>
+/**
+ * Entirely plausible to have this do the pagination.
+ *
+ */
+export default {
+    props: {
+      'loading': { type: Boolean },
+    },
+    data() {
+        return {
+
+        }
+    },
+
+
+}
+
+</script>

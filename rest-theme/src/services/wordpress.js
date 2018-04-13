@@ -26,13 +26,6 @@ let wordpressService = {
           .catch(error => reject(error));
   },
 
-  getPageBySlug: function(page_slug) {  //pageId,
-    let path = Config.root + "wp-json/wp/v2/page/?slug="+page_slug;
-    return new Promise((resolve, reject) => {
-        this.getFromAPI( path, resolve, reject );
-    })
-  },
-
   getPostBySlug: function(post_type, post_slug) {  //pageId,
     let path = Config.root + "wp-json/wp/v2/"+post_type+"/?slug="+post_slug;  // SEO "hydrate" via PHP: Register this API Path+variables, and dump all possible data into a js var in footer?
     return new Promise((resolve, reject) => {
@@ -40,8 +33,8 @@ let wordpressService = {
     })
   },
 
-  getPosts: function(pageIndex, perPage) {
-    let path = Config.root + "wp-json/wp/v2/post?page="+Math.max(1,parseInt(pageIndex))+"&per_page="+Math.max(1,parseInt(perPage));
+  getPosts: function(post_type, pageIndex, perPage) {
+    let path = Config.root + "wp-json/wp/v2/"+post_type+"?page="+Math.max(1,parseInt(pageIndex))+"&per_page="+Math.max(1,parseInt(perPage));
     return new Promise((resolve, reject) => {
         this.getFromAPI( path, resolve, reject );
     })
@@ -89,6 +82,19 @@ let wordpressService = {
   },
 
 //////////////// Non-Posts ////////////////
+  getAuthors: function( author_slug , per_page ) {
+    let path = Config.root + "wp-json/wp/v2/users/?per_page"+per_page;
+    return new Promise((resolve, reject) => {
+
+        Vue.http.get( path ).then(response => {
+              if( typeof response.data !== 'object') reject( response );
+
+              resolve({authors: response.data })
+            })
+            .catch(error => reject(error))
+    })
+  },
+
   getAuthorInfo: function( author_slug ) {
     let path = Config.root + "wp-json/wp/v2/users/?username="+author_slug;
     return new Promise((resolve, reject) => {
@@ -101,6 +107,20 @@ let wordpressService = {
 
             })
             .catch(error => reject(error))
+    })
+  },
+
+  getTaxTerms: function( taxonomy_name, per_page ){ //, term_slug){
+    let path = Config.root + "wp-json/wp/v2/"+taxonomy_name+"/?per_page="+per_page; //+"/?slug="+term_slug;
+    return new Promise((resolve, reject) => {
+
+        Vue.http.get( path ).then(response => {
+              if( typeof response.data !== 'object') reject( response );
+
+              resolve({ terms: response.data })
+            })
+            .catch(error => reject(error));
+
     })
   },
 

@@ -9,16 +9,16 @@
         <h1 class="page-title" v-if="(author)">Posts by {{ author.name }}</h1>
         <p class="archive-description" v-if="(author)">{{ author.description }}</p>
 
-        <div :class="['posts-wrapper', 'author-archive', {'content-loading': loading, 'content-loaded':(!loading) } ]">
-            <loading v-if="(loading)"></loading>
-            <not-found v-if="(!loading && posts.length == 0)" :slug="author_slug"></not-found>
+        <div :class="['posts-wrapper', 'author-archive', {'content-loading': posts_loading, 'content-loaded':(!posts_loading) } ]">
+            <loading v-if="(posts_loading)" :loading="posts_loading"></loading>
+            <not-found v-if="(!app_loading && !posts_loading && posts.length == 0)" :slug="author_slug"></not-found>
 
             <transition name="fade" appear>
               <router-view name="post-list" :posts="posts" :key="this.$route.fullPath"></router-view>
             </transition>
         </div>
 
-        <div class="pagination" v-if="(!loading && post_count > 0)">
+        <div class="pagination" v-if="(!posts_loading && post_count > 0)">
           <p>Posts: {{ post_count }}</p>
           <p v-if="( page_count == 1)">All Posts Shown.</p>
           <ul v-if="( page_count  > 1)" class="posts-pagination list-inline">
@@ -34,6 +34,7 @@
 </template>
 
 <script>
+    import Vuex from 'vuex';
     import Config from '../app.config.js'
     import Mixin from '../globals.js';
     import WordpressService from '../services/wordpress';
@@ -53,36 +54,62 @@
 
         data() {
             return {
-                loading: true,
+                app_loading: true,
                 error: false,
                 author: {},
-                posts: [],
-                post_count: 0,
-                page_count: 1,
                 pagination_slug: '',
-                params: { paged_index: 1 }  //handy place to merge props & params
+                params: { paged_index: 1, posts_per_page: Config.posts_per_page}  //handy place to merge props & params
             }
         },
 
+        computed: {
+            ...Vuex.mapState(['posts_loading']),
+
+            requested_type: function(){  // unify params & props..
+              return 'post';
+            },
+
+            posts: function(){
+              return this.$store.getters.getPostsByAuthorSlug(this.author.slug, this.params.paged_index, this.params.posts_per_page );
+            },
+
+            page_count: function(){
+              return Math.ceil(this.post_count/this.params.posts_per_page);
+            }
+
+        },
+
+        watch: {
+
+          posts_loading: function(){
+            this.app_loading=this.posts_loading;
+          }
+
+        },
+
         beforeRouteUpdate (to, from, next) {  // Option A: App-Level component gets fully-replaced; Option B: here: manually swap data.
-          // react to route changes.. (for subcomponents/router-view)
-          this.loading = true;
-          this.posts= []; //clear for now
+          this.app_loading=false;
 
-          this.params = {  ...to.params, ...this.$props };
+            this.params = { ...this.params,  ...to.params, ...this.$props };
 
-          this.getAuthor( this.params.author_slug );
+            this.getAuthor( this.params.author_slug );
 
-          next(); // don't forget to call next()
+            next(); // don't forget to call next()
         },
 
         created() {
+            this.app_loading = true;
+
             this.params = { ...this.params, ...this.$props, ...this.$route.params }; // right-most wins
 
             this.getAuthor( this.params.author_slug );
 
-            this.updateHTMLTitle("Archive: "+this.author_slug); //TODO: Use actual author name
+            this.updateHTMLTitle("Archive: "+this.params.author_slug); //TODO: Use actual author name
 
+        },
+
+        updated() {
+            this.post_count = this.$store.getters.getArchivePostCount( 'author', this.params.author_slug );
         },
 
         methods: {
@@ -91,7 +118,7 @@
                 const wpPromisedResult = WordpressService.getAuthorInfo( author_slug )
                 wpPromisedResult.then(result => {
                       console.log("getAuthor Found!", result.authors );
-                      this.loading = false;
+                      this.app_loading = false;
 
                       if( result.authors.length == 0 ) this.error = true;
 
@@ -100,44 +127,23 @@
                         if(result.authors[userIndex].slug == author_slug){
                           this.author = result.authors[userIndex];
                           console.log("Found Author Data: ",this.author);
-                          this.getPosts();
+                          this.fetchPosts();
                         }
                       }
 
                   })
                   .catch(err => {
+                    this.app_loading = false;
                     this.error = true;
                     console.log("getAuthor Error!", err, wpPromisedResult);
                   });
 
             },
 
-            getPosts: function() {
-                this.loading = true;
-
-                const wpPromisedResult = WordpressService.getAuthorPosts( this.author.id , this.params.paged_index, Config.posts_per_page);
-                wpPromisedResult.then(result => {
-                      console.log("Author Posts Found!", result);
-                      this.loading = false;
-
-                      if( result.posts.length == 0){
-                          this.error = true; //alternate content control too
-                          console.log("Author Posts Found, no data");
-                      }else{
-                          this.posts = result.posts;
-                      }
-
-                      this.post_count = result.totalPosts;
-                      this.page_count = Math.ceil( this.post_count / Config.posts_per_page);
-
-                  })
-                  .catch(err => {
-                    this.error = true;
-
-                    console.log("Author Posts Error!", wpPromisedResult);
-                  });
+            fetchPosts: function() {
+                this.$store.dispatch('FETCH_AUTHOR_POSTS', { author: this.author, ...this.params, order: this.order } );
             }
 
-        }
+        }//methods
     }
 </script>

@@ -21,6 +21,32 @@ var mixins = {
       updateHTMLTitle(pageTitle) {
           document.title = (pageTitle ? pageTitle + ' - ' : '') + wp.site_name;
       },
+
+      linkToRouterLink(){
+          console.log("linkToRouterLink", jQuery(".post-list article").length , jQuery( "#app-root  a[href^='"+wp.base_url+"'], #app-root  a[href^='/']:not([href*='#'])"  ));
+
+          const $vm = this;
+
+          jQuery( "#app-root a[href^='"+wp.base_url+"'], #app-root  a[href^='/']:not([href*='#'])"  ).addClass("vue-route-able");
+
+          // Watch for any links pulled in from WP articles, etc.
+          jQuery( "a[href^='"+wp.base_url+"'], a[href^='/']:not([href*='#'])"  ).on("click", function(event){
+              event.preventDefault();
+
+
+            //Decide which route:
+              let linkPath = ( jQuery(this).attr("href").indexOf(wp.base_url) > -1) ? jQuery(this).attr("href").replace(wp.base_url,'/') : jQuery(this).attr("href").replace(wp.base_path,'/');
+
+
+              console.log("Clicked a link-to-router-link (globals)!", linkPath.replace("//","/"));
+
+            // Actually change the path now:
+              $vm.$router.push( linkPath.replace("//","/")  );
+          });
+
+      }
+
+
   }
 
 }

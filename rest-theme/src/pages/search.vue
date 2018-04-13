@@ -9,7 +9,7 @@
         <h1 class="page-title" v-if="(params.term_slug)">Search Results for &ldquo;{{ params.term_slug }}&rdquo;</h1>
 
         <div :class="['posts-wrapper", "search-archive', {'content-loading': loading, 'content-loaded':(!loading) } ]">
-            <loading v-if="(loading)"></loading>
+            <loading v-if="(loading)" :loading="loading"></loading>
             <not-found v-if="(!loading && posts.length == 0)" :slug="term_slug"></not-found>
 
             <transition name="fade" appear>
@@ -67,8 +67,7 @@
         // Option C: API.getAll -> PostList.posts.chunk(per_page, paged_index);
 
         beforeRouteUpdate (to, from, next) {
-          // react to route changes.. (for subcomponents/router-view)
-          this.loading = true;
+
           this.posts= []; //clear for now
 
           this.params = {  ...to.params, ...this.$props };
@@ -81,9 +80,16 @@
         created() {
             this.params = { ...this.params, ...this.$props, ...this.$route.params }; // right-most wins
 
-              this.updateHTMLTitle("Search Results for "+this.params.term_slug);
+            this.updateHTMLTitle("Search Results for "+this.params.term_slug);
 
             this.getPosts( this.params.term_slug);
+        },
+
+        updated: function(){
+            this.linkToRouterLink();  //must be called to make all inline-links into vue-friendly router-links
+            this.$nextTick(function () { // Handy function for all children updates
+              this.linkToRouterLink();
+            });
         },
 
         methods: {

@@ -9,16 +9,16 @@
         <h1 class="page-title" v-if="(term)">{{ term.name }}</h1>
         <p class="archive-description" v-if="(term)">{{ term.description }}</p>
 
-        <div :class="['posts-wrapper', {'content-loading': loading, 'content-loaded':(!loading) } ]">
-            <loading v-if="(loading)"></loading>
-            <not-found v-if="(!loading && posts.length == 0)"  :slug="term_slug"></not-found>
+        <div :class="['posts-wrapper', {'content-loading': posts_loading, 'content-loaded':(!posts_loading) } ]">
+            <loading v-if="(app_loading)" :loading="app_loading"></loading>
+            <not-found v-if="(!app_loading && !posts_loading && posts.length == 0)"  :slug="term_slug"></not-found>
 
             <transition name="fade" appear>
               <router-view name="post-list" :posts="posts" :key="this.$route.fullPath"></router-view>
             </transition>
         </div>
 
-        <div class="pagination" v-if="(!loading && post_count > 0)">
+        <div class="pagination" v-if="(!posts_loading && post_count > 0)">
           <p>Posts: {{ post_count }}</p>
           <p v-if="( page_count == 1)">All Posts Shown.</p>
           <ul v-if="( page_count > 1 && pagination_component_name )" class="posts-pagination list-inline">
@@ -34,6 +34,7 @@
 </template>
 
 <script>
+    import Vuex from 'vuex';
     import Config from '../app.config.js'
     import Mixin from '../globals.js';
     import WordpressService from '../services/wordpress';
@@ -41,6 +42,7 @@
     import NotFound from '../components/not-found.vue';
     import Loading from '../components/loading.vue';
     import PostList from '../components/post-list.vue';
+
 
     export default {
         mixins: [Mixin],
@@ -53,47 +55,75 @@
 
         data() {
             return {
-                loading: true,
+                app_loading: true,
                 error: false,
                 term: {},
-                posts: [],
-                post_count: 0,
-                page_count: 1,
+                post_count: -1,
                 pagination_component_name: 'Taxonomy-Category-Archive-Paged',
-                params: { paged_index: 1 }  //handy place to merge props & params
+                params: { paged_index: 1, posts_per_page: Config.posts_per_page  }  //handy place to merge props & params
             }
         },
 
-        beforeRouteUpdate (to, from, next) {  // Option A: App-Level component gets fully-replaced; Option B: here: manually swap data.
-          // react to route changes.. (for subcomponents/router-view)
-          this.loading = true;
+        computed: {
+            ...Vuex.mapState(['posts_loading']),
 
-          this.params = { ...this.$props, ...to.params };
+            requested_type: function(){  // unify params & props..
+              return 'post';
+            },
 
-          this.getPostsByTerm(this.taxonomy_name, this.term.id , to.params.paged_index); //implicit page_id
+            posts: function(){
+              return this.$store.getters.getPostsByTerm(this.requested_type, this.params.taxonomy_name, this.term, this.params.paged_index, this.params.posts_per_page );
+            },
 
-          next(); // don't forget to call next()
+            page_count: function(){
+                return Math.ceil(this.post_count/this.params.posts_per_page);
+            }
+
         },
 
         created() {
+
             this.params = { ...this.params, ...this.$props, ...this.$route.params }; // right-most wins
 
             this.pagination_component_name = (this.$route.name) ? this.$route.name : "Taxonomy-Category-Archive-Paged";
               this.pagination_component_name=this.pagination_component_name.replace("-UnPaged","");
               if( this.pagination_component_name.indexOf("-Paged") < 0) this.pagination_component_name=this.pagination_component_name+"-Paged"; //the pagination component will always be paged!
 
-            this.updateHTMLTitle("Archive: "+this.term_slug);  //TODO: Use actual term name
+            this.updateHTMLTitle("Archive: "+this.params.term_slug);  //TODO: Use actual term name
 
-            if(this.post_types.length==1 && typeof this.taxonomy_name == 'undefined'){
+            if(this.params.post_types.length==1 && typeof this.params.taxonomy_name == 'undefined'){
               this.getPostsByTerm('', '', this.params.paged_index);  // URI: /custom-post-type/
 
             }else{  // URI: /taxonomy-name/term-name/
 
-              if( typeof this.params.term_slug !== "undefined" && this.post_types) this.getTermInfo(this.taxonomy_name, this.params.term_slug);
+              if( typeof this.params.term_slug !== "undefined" && this.params.post_types) this.getTermInfo(this.params.taxonomy_name, this.params.term_slug);
               else console.log( "Term Slug is undefined, no content will be loaded: ", this.params, this.$route.params, this.$props );
 
             }
 
+        },
+
+        beforeRouteUpdate (to, from, next) {  // Option A: App-Level component gets fully-replaced; Option B: here: manually swap data.
+          this.app_loading=false;
+
+          //this.params = { ...this.$props, ...to.params };
+          this.params = { ...this.params, ...this.$props, ...to.params };
+
+          this.getPostsByTerm(this.params.taxonomy_name, this.term.id , to.params.paged_index); //implicit page_id
+
+          next(); // don't forget to call next()
+        },
+
+        watch: {
+
+          posts_loading: function(){
+            this.app_loading=this.posts_loading;
+          }
+
+        },
+
+        updated() {
+            this.post_count = this.$store.getters.getArchivePostCount( 'taxonomy', this.params.taxonomy_name+"/"+this.params.term_slug );
         },
 
         methods: {
@@ -102,7 +132,7 @@
 
                 const wpPromisedResult = WordpressService.getTermInfo( taxonomy_name, term_slug );
                 wpPromisedResult.then(result => {
-                      this.loading = false;
+                      this.app_loading = false;
 
                       if( result.terms.length == 0 ) this.error = true;
 
@@ -118,36 +148,8 @@
             }, // getTermInfo
 
             getPostsByTerm: function(taxonomy_name, term_id, page_index) {
-                this.loading = true;
-                let post_type_index = 0;
-                this.posts= []; //clear for now
-                for(post_type_index in this.post_types){
-
-                    const wpPromisedResult = WordpressService.getTermPosts( this.post_types[post_type_index], taxonomy_name, term_id, page_index, Config.posts_per_page);
-                    wpPromisedResult.then(result => {
-                        this.post_count = result.totalPosts;
-                        this.page_count = Math.ceil( this.post_count / Config.posts_per_page);
-
-                        this.loading = false;
-
-                        if( result.posts.length == 0 ) this.error = true;
-
-                        let middle_man = this.posts;
-                        this.posts = middle_man.concat(result.posts);  //concat directly on posts does not update: https://vuejs.org/v2/guide/list.html#Caveats
-                        this.posts = result.posts;
-
-                        console.log("getPostsByTerm Result:", result);
-
-                    })
-                    .catch(err => {
-                      this.error = true;
-                      console.log("getPostsByTerm Error!", err, wpPromisedResult);
-                    });
-
-                }//for
-
-            }// getPostsByTerm
-
+              this.$store.dispatch('FETCH_TERM_POSTS', { 'term_object': this.term, ...this.params } );
+            }  // getPostsByTerm
 
         }
 

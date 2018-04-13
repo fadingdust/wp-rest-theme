@@ -8,16 +8,16 @@
     <main class="content">
         <h1 class="page-title" v-if="(this.year)">Posts from {{monthTitle}} </h1>
 
-        <div :class="['posts-wrapper', {'content-loading': loading, 'content-loaded':(!loading) } ]">
-            <loading v-if="(loading)"></loading>
-            <not-found v-if="(!loading && posts.length == 0)" :slug="monthTitle"></not-found>
+        <div :class="['posts-wrapper', {'content-loading': posts_loading, 'content-loaded':(!posts_loading) } ]">
+            <loading v-if="(posts_loading)" :loading="posts_loading"></loading>
+            <not-found v-if="(!posts_loading && posts.length == 0)" :slug="monthTitle"></not-found>
 
             <transition name="fade" appear>
-              <router-view name="post-list" :posts="posts" :key="this.$route.fullPath"></router-view>
+              <router-view name="post-list" :posts="posts" :post_count="post_count" :page_index="params.paged_index"  :key="this.$route.fullPath"></router-view>
             </transition>
         </div>
 
-        <div class="pagination" v-if="(!loading && post_count > 0)">
+        <div class="pagination" v-if="(!posts_loading && post_count > 0)">
           <p>Posts: {{ post_count }}</p>
           <p v-if="( page_count == 1)">All Posts Shown.</p>
           <ul v-if="( page_count  > 1)" class="posts-pagination list-inline">
@@ -34,8 +34,8 @@
 
 <script>
     import Config from '../app.config.js'
+    import Vuex from 'vuex';
     import Mixin from '../globals.js';
-    import WordpressService from '../services/wordpress';
     import moment from "moment";
 
     import NotFound from '../components/not-found.vue';
@@ -45,45 +45,55 @@
     export default {
         mixins: [Mixin],
 
-        props: ['year','month'],
-
         components: {
           NotFound, Loading, PostList
         },
 
-        computed:{
-          monthTitle: function(){
-            let dateString="";
-            if( this.year!=="" && this.month) dateString = moment(this.year+"-"+this.month+"-"+1).format("MMMM YYYY");
-            else if( this.year!==""  && !this.month) dateString = moment(this.year+"-1-1").format("YYYY");
-            return dateString;
-          }
-        },
+        props: ['year','month'],
 
         data() {
             return {
-                loading: true,
+                app_loading: true,
                 error: false,
                 order: 'desc',
-                posts: [],
-                post_count: 0,
-                page_count: 1,
+                post_count: -1,
                 pagination_component_name: 'Month-Archive-Paged',
                 params: { paged_index: 1 }  //handy place to merge props & params
             }
         },
 
+        computed:{
+            ...Vuex.mapState(['posts_loading']),
 
-        beforeRouteUpdate (to, from, next) {  // Option A: App-Level component gets fully-replaced; Option B: here: manually swap data.
-          // react to route changes.. (for subcomponents/router-view)
-          this.loading = true;
-          this.posts= []; //clear for now
+            monthTitle: function(){
+              let dateString="";
+              if( this.params.year!=="" && this.params.month) dateString = moment(this.params.year+"-"+this.params.month+"-"+1).format("MMMM YYYY");
+              else if( this.params.year!=="" && !this.params.month) dateString = moment(this.params.year+"-1-1").format("YYYY");
+              return dateString;
+            },
 
-          this.params = { ...to.params, ...this.$props };
+            requested_post_types : function(){
+                let post_types = this.params.post_types;
+                if (!this.params.post_types) post_types = ['post'];
+                return post_types;
+            },
 
-          this.getPosts(); //implicit page_id
+            posts: function(){
+                return this.$store.getters.getPostsByMonth( this.params.year, this.params.month, this.params.paged_index);
+            },
 
-          next(); // don't forget to call next()
+            page_count: function(){
+                return Math.ceil(this.post_count/Config.posts_per_page);
+            }
+
+        },
+
+        watch: {
+
+          posts_loading: function(){ //what about when it pulls from the store? no posts are loading then :/
+            this.app_loading=this.posts_loading;
+          }
+
         },
 
         created() {
@@ -93,7 +103,22 @@
             this.pagination_component_name = this.pagination_component_name.replace("-UnPaged","");
             if( this.pagination_component_name.indexOf("-Paged") < 0) this.pagination_component_name=this.pagination_component_name+"-Paged"; //the pagination component will always be paged!
 
-            this.getPosts();
+            this.fetchPosts();
+        },
+
+        beforeRouteUpdate (to, from, next) {  // Option A: App-Level component gets fully-replaced; Option B: here: manually swap data.
+          this.app_loading=false;
+
+          this.params = { ...to.params, ...this.$props };
+
+          this.fetchPosts(); //implicit page_id
+
+          next(); // don't forget to call next()
+        },
+
+        updated() {
+          this.app_loading=false;
+          this.post_count = this.$store.getters.getArchivePostCount( 'month', this.params.year+"/"+this.params.month );
         },
 
         mounted() {
@@ -101,29 +126,8 @@
         },
 
         methods: {
-            getPosts: function() {
-                const wpPromisedResult = WordpressService.getMonthPosts( this.params.year, this.params.month, this.params.paged_index, Config.posts_per_page, this.order );
-                wpPromisedResult.then(result => {
-                      console.log("PostSlug Found!", result.posts, result.totalPages);
-                      this.loading = false;
-
-                      if( result.posts.length == 0){
-                          this.error = true; //alternate content control too
-                          console.log("PostSlug Found, no data");
-
-                      }else{
-                          this.posts = result.posts;
-                      }
-
-                      this.post_count = result.totalPosts;
-                      this.page_count = Math.ceil( this.post_count / Config.posts_per_page);
-
-                  })
-                  .catch(err => {
-                    this.error = true;
-
-                    console.log("PostSlug Error!", wpPromisedResult);
-                  });
+            fetchPosts: function() {
+                this.$store.dispatch('FETCH_MONTH_POSTS', { year: this.params.year, month: this.params.month, paged_index: this.params.paged_index, posts_per_page: Config.posts_per_page, order: this.order  } );
             }
         }
     }

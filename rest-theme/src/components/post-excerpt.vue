@@ -89,6 +89,10 @@ article img{
         },
 
         created: function() {
+//          this.post.content.rendered=this.post.excerpt.rendered.replace("read-more","read-more and-more");
+//                this.post.content.rendered=this.post.content.rendered.replace("<a href=","<router-view :to");
+//                this.post.content.rendered=this.post.content.rendered.replace("</a>","</router-view>");
+
                 this.this_post = this.post;
         },
 
